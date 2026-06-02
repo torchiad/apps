@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Sundry</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<style>
+  :root{
+    --paper:  oklch(0.97 0.018 95);
+    --ink:    oklch(0.18 0.02 60);
+    --soft:   oklch(0.4 0.02 60);
+    --faint:  oklch(0.55 0.02 60);
+    --card:   oklch(0.995 0.006 95);
+    --header: oklch(0.88 0.072 268);
+    --active: oklch(0.82 0.145 33);
+    --spring: cubic-bezier(.34,1.56,.4,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{font-family:"Plus Jakarta Sans",system-ui,sans-serif;color:var(--ink);line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    background:
+      radial-gradient(oklch(0.2 0.02 60/.07) 1.5px,transparent 1.6px) 0 0/22px 22px,
+      var(--paper);}
+  .disp{font-family:"Bricolage Grotesque",system-ui,sans-serif}
+  .mono{font-family:"Space Mono",monospace}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px}
+
+  header{position:sticky;top:0;z-index:60;background:color-mix(in oklab,var(--header) 90%,transparent);
+    backdrop-filter:blur(10px);border-bottom:2.5px solid var(--ink)}
+  .bar{display:flex;align-items:center;gap:14px;height:72px}
+  .brand{display:flex;align-items:center;gap:11px;flex:none}
+  .brand .mark{width:32px;height:32px;border:2.5px solid var(--ink);border-radius:9px;
+    background:oklch(0.78 0.17 30);box-shadow:3px 3px 0 var(--ink);display:grid;place-items:center;
+    transition:transform .3s var(--spring)}
+  .brand .mark::after{content:"";width:12px;height:12px;border-radius:4px;background:var(--ink)}
+  .brand:hover .mark{transform:rotate(-8deg) scale(1.05)}
+  .brand b{font-family:"Bricolage Grotesque";font-weight:800;font-size:22px;letter-spacing:-.03em}
+  .brand b span{color:var(--faint)}
+
+  .search{flex:1;min-width:120px;position:relative;display:flex;align-items:center}
+  .search svg{position:absolute;left:15px;width:17px;height:17px;color:var(--soft);pointer-events:none}
+  .search input{width:100%;font:inherit;font-size:15px;font-weight:600;padding:11px 14px 11px 42px;
+    border:2.5px solid var(--ink);border-radius:13px;background:var(--card);color:var(--ink);
+    box-shadow:3px 3px 0 var(--ink);transition:box-shadow .15s,transform .15s}
+  .search input::placeholder{color:var(--faint);font-weight:500}
+  .search input:focus{outline:none;transform:translate(-1px,-1px);box-shadow:4px 4px 0 oklch(0.72 0.16 33)}
+
+  .seg{display:flex;border:2.5px solid var(--ink);border-radius:13px;overflow:hidden;box-shadow:3px 3px 0 var(--ink);flex:none}
+  .seg button{font-family:"Bricolage Grotesque";font-weight:700;font-size:13.5px;color:var(--ink);white-space:nowrap;
+    background:var(--card);border:none;cursor:pointer;padding:11px 15px;transition:background .15s;
+    display:flex;align-items:center;justify-content:center}
+  .seg button+button{border-left:2.5px solid var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--active)}
+  .seg.icons button{padding:11px 12px}
+  .seg svg{width:17px;height:17px;display:block}
+  .lbl-hide{}
+  @media(max-width:720px){.brand b{display:none}.lbl-hide{display:none}}
+  @media(max-width:520px){.bar{flex-wrap:wrap;height:auto;padding:12px 0;gap:10px}.search{order:3;flex-basis:100%}}
+
+  .strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:22px 0 6px;flex-wrap:wrap}
+  .strip .count{font-family:"Space Mono";font-size:12.5px;font-weight:700;color:var(--faint)}
+  .strip .count b{color:var(--ink)}
+  .strip .hint{font-family:"Space Mono";font-size:11.5px;color:var(--faint)}
+
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(244px,1fr));gap:20px;padding:14px 0 70px}
+  .tile{display:flex;flex-direction:column;border:2.5px solid var(--ink);border-radius:22px 19px 24px 20px;background:var(--card);
+    overflow:hidden;box-shadow:5px 5px 0 0 var(--pop),5px 5px 0 1.5px var(--ink);
+    transition:transform .2s var(--spring),box-shadow .2s var(--spring)}
+  .tile:hover{transform:translate(-3px,-3px);box-shadow:9px 9px 0 0 var(--pop),9px 9px 0 1.5px var(--ink)}
+  .tile:active{transform:translate(0,0);box-shadow:3px 3px 0 0 var(--pop),3px 3px 0 1.5px var(--ink)}
+  .tile-art{position:relative;aspect-ratio:16/10;background-size:cover;background-position:center;
+    border-bottom:2.5px solid var(--ink);overflow:hidden}
+  .tile-art::after{content:"↗";position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:9px;
+    border:2px solid var(--ink);background:var(--paper);display:grid;place-items:center;font-weight:700;font-size:15px;
+    transform:scale(0) rotate(-20deg);transition:transform .25s var(--spring)}
+  .tile:hover .tile-art::after{transform:scale(1) rotate(0)}
+  .tile-body{padding:15px 16px 16px;display:flex;flex-direction:column;gap:8px;flex:1}
+  .tile-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .tile-name{font-family:"Bricolage Grotesque";font-weight:800;font-size:19px;letter-spacing:-.02em}
+  .chip{font-size:11px;font-weight:700;border:2px solid var(--ink);border-radius:999px;padding:2px 9px;
+    background:var(--pop-soft);white-space:nowrap;transform:rotate(-1.5deg)}
+  .tile-blurb{font-size:13.5px;color:var(--soft);font-weight:500;flex:1;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .tile-foot{display:flex;align-items:center;justify-content:space-between;margin-top:2px;
+    font-family:"Space Mono";font-size:11px;font-weight:700;color:var(--faint)}
+  .tile-foot .launch{display:inline-flex;align-items:center;gap:5px;color:var(--ink)}
+
+  .list{list-style:none;display:flex;flex-direction:column;gap:12px;padding:14px 0 70px}
+  .list .tile{flex-direction:row;align-items:center;gap:18px;padding:14px}
+  .list .tile-art{width:72px;height:72px;aspect-ratio:auto;border:2.5px solid var(--ink);border-radius:14px;flex:none}
+  .list .tile-art::after{display:none}
+  .list .tile-body{padding:0;gap:4px}
+  .list .tile-blurb{-webkit-line-clamp:1;white-space:nowrap;max-width:52ch}
+  .list .tile-meta{display:flex;align-items:center;gap:18px;flex:none;margin-left:auto}
+  .list .r-m{text-align:right;font-family:"Space Mono";font-size:11px;line-height:1.5;color:var(--faint);font-weight:700}
+  .list .r-m b{display:block;color:var(--ink);font-size:13px}
+  .list .go{width:42px;height:42px;border-radius:12px;border:2.5px solid var(--ink);display:grid;place-items:center;
+    background:var(--pop);transition:transform .2s var(--spring)}
+  .list .tile:hover .go{transform:rotate(8deg) scale(1.06)}
+  .list .go svg{width:17px;height:17px}
+  .list .tile-foot{display:none}
+  @media(max-width:640px){.list .tile-meta{display:none}.list .tile-foot{display:flex}.list .tile-blurb{white-space:normal}}
+
+  .empty{text-align:center;padding:70px 0;color:var(--faint)}
+  .empty b{display:block;font-family:"Bricolage Grotesque";color:var(--ink);font-size:24px;margin-bottom:6px;font-weight:800}
+
+  footer{border-top:2.5px solid var(--ink);margin-top:8px;padding:24px 0 56px;display:flex;
+    justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px}
+  footer .brand b{font-size:16px}
+  footer span{font-family:"Space Mono";font-size:12px;color:var(--faint);font-weight:700}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <a class="brand" href="/"><span class="mark"></span><b>Sundry<span>/</span></b></a>
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="q" type="search" placeholder="Search apps &amp; games…" autocomplete="off" />
+    </label>
+    <div class="seg" role="group" aria-label="Sort">
+      <button data-sort="new" aria-pressed="true">Newest</button>
+      <button data-sort="pop" aria-pressed="false">Popular</button>
+    </div>
+    <div class="seg icons" role="group" aria-label="View">
+      <button data-view="grid" aria-pressed="true" title="Grid">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+      </button>
+      <button data-view="list" aria-pressed="false" title="List">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01"/></svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="strip">
+    <div class="count" id="count"></div>
+    <div class="hint">click any tile to launch ↗</div>
+  </div>
+  <div id="board"></div>
+</main>
+
+<footer class="wrap">
+  <a class="brand" href="/"><span class="mark"></span><b>Sundry</b></a>
+  <span>© 2026 · my shelf of useful things</span>
+</footer>
+
+<script src="projects.js"></script>
+<script>
+(function(){
+  const { fmtDate, fmtUses, pop, popSoft, thumbBold } = window.HUB;
+  const items = window.PROJECTS.slice();
+  const cats = new Set(items.map(p=>p.category));
+
+  const board=document.getElementById("board"), countEl=document.getElementById("count");
+  let sort=localStorage.getItem("sundry.sort")||"new";
+  let view=localStorage.getItem("sundry.view")||"grid";
+  let query="";
+
+  const arrow=`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>`;
+
+  function tileGrid(p){
+    const h=p.hue;
+    return `<a class="tile" href="${p.path||'#'}" style="--pop:${pop(h)};--pop-soft:${popSoft(h)}">
+      <div class="tile-art" style="background-image:url('${thumbBold(h,p.pattern)}')"></div>
+      <div class="tile-body">
+        <div class="tile-top"><span class="tile-name">${p.name}</span><span class="chip">${p.category}</span></div>
+        <div class="tile-blurb">${p.blurb}</div>
+        <div class="tile-foot"><span>${fmtUses(p.uses)} opens · ${fmtDate(p.date)}</span><span class="launch">launch ${arrow}</span></div>
+      </div>
+    </a>`;
+  }
+  function tileList(p){
+    const h=p.hue;
+    return `<li><a class="tile" href="${p.path||'#'}" style="--pop:${pop(h)};--pop-soft:${popSoft(h)}">
+      <span class="tile-art" style="background-image:url('${thumbBold(h,p.pattern)}')"></span>
+      <div class="tile-body">
+        <div class="tile-top"><span class="tile-name">${p.name}</span><span class="chip">${p.category}</span></div>
+        <div class="tile-blurb">${p.blurb}</div>
+        <div class="tile-foot"><span>${fmtUses(p.uses)} opens · ${fmtDate(p.date)}</span></div>
+      </div>
+      <div class="tile-meta">
+        <span class="r-m"><b>${fmtUses(p.uses)}</b>opens</span>
+        <span class="r-m"><b>${fmtDate(p.date)}</b>added</span>
+        <span class="go">${arrow}</span>
+      </div>
+    </a></li>`;
+  }
+
+  function render(){
+    let rows=items.filter(p=>!query||(p.name+" "+p.blurb+" "+p.category).toLowerCase().includes(query));
+    rows.sort((a,b)=> sort==="new"?new Date(b.date)-new Date(a.date):b.uses-a.uses);
+
+    countEl.innerHTML = query
+      ? `<b>${rows.length}</b> ${rows.length===1?"match":"matches"} for "${query}"`
+      : `<b>${items.length}</b> apps · ${cats.size} categories`;
+
+    if(!rows.length){board.className="";board.innerHTML=`<div class="empty"><b>Nothing here</b>No app matches that search.</div>`;return;}
+
+    if(view==="grid"){
+      board.className="grid";
+      board.innerHTML=rows.map(tileGrid).join("");
+    }else{
+      board.className="";
+      board.innerHTML=`<ul class="list">${rows.map(tileList).join("")}</ul>`;
+    }
+  }
+
+  document.getElementById("q").addEventListener("input",e=>{query=e.target.value.trim().toLowerCase();render();});
+
+  document.querySelectorAll('.seg [data-sort]').forEach(b=>b.addEventListener("click",()=>{
+    sort=b.dataset.sort;localStorage.setItem("sundry.sort",sort);
+    document.querySelectorAll('.seg [data-sort]').forEach(x=>x.setAttribute("aria-pressed",x===b));
+    render();
+  }));
+  document.querySelectorAll('.seg [data-view]').forEach(b=>b.addEventListener("click",()=>{
+    view=b.dataset.view;localStorage.setItem("sundry.view",view);
+    document.querySelectorAll('.seg [data-view]').forEach(x=>x.setAttribute("aria-pressed",x===b));
+    render();
+  }));
+
+  document.querySelectorAll('.seg [data-sort]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.sort===sort));
+  document.querySelectorAll('.seg [data-view]').forEach(x=>x.setAttribute("aria-pressed",x.dataset.view===view));
+  render();
+})();
+</script>
+</body>
+</html>
