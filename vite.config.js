@@ -1,5 +1,4 @@
 import { defineConfig } from 'vite';
-import { glob } from 'glob';
 import path from 'path';
 import { fileURLToPath } from 'url';
 
