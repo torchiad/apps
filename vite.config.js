@@ -11,6 +11,7 @@ const input = {
 };
 
 export default defineConfig({
+    base: '/apps/',
     build: {
         rollupOptions: {
             input,
