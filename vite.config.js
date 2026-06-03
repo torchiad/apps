@@ -6,8 +6,8 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Build multiple entry points - one for each app in src/apps/
 const input = {
-    index: path.resolve(__dirname, 'src/index.html'),
-    shoreline: path.resolve(__dirname, 'src/apps/shoreline/index.html'),
+    index: path.resolve(__dirname, 'index.html'),
+    shoreline: path.resolve(__dirname, 'apps/shoreline/index.html'),
 };
 
 export default defineConfig({
