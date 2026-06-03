@@ -1,0 +1,330 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Shoreline — your weekend beach, sorted</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,700;12..96,800&family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#10243a;--paper:#f6f1e7;--card:#fffdf8;
+    --accent:#ff6b35;--accent2:#ffd23f;
+    --seaDeep:#0a4f7a;
+    --exc:#0a7d4a;--good:#5fb86f;--suf:#e0a52a;--poor:#c43a2a;
+    --hair:rgba(16,36,58,.14);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{font-family:'Newsreader',serif;background:var(--paper);color:var(--ink);
+    background-image:radial-gradient(circle at 12% 8%,rgba(255,107,53,.06),transparent 40%),radial-gradient(circle at 88% 0%,rgba(10,79,122,.07),transparent 45%);}
+  .wrap{max-width:720px;margin:0 auto;padding:0 18px 70px}
+
+  header{padding:34px 0 14px;border-bottom:2px solid var(--ink)}
+  .kicker{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:3px;text-transform:uppercase;color:var(--accent);font-weight:500}
+  header h1{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:clamp(40px,9vw,68px);line-height:.92;letter-spacing:-2px;margin:6px 0 0}
+  header h1 em{font-family:'Newsreader',serif;font-style:italic;font-weight:400;color:var(--accent)}
+  .standfirst{font-size:16px;max-width:46ch;margin-top:12px;opacity:.8;line-height:1.45}
+
+  .panel{background:var(--card);border:2px solid var(--ink);margin-top:26px;box-shadow:6px 6px 0 var(--ink)}
+  .panel-top{display:flex;align-items:stretch;border-bottom:2px solid var(--ink)}
+  .origin-field{flex:1;padding:16px 18px}
+  .origin-field label{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:2px;text-transform:uppercase;opacity:.55;display:block;margin-bottom:7px}
+  .origin-select{position:relative}
+  select{width:100%;font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:22px;border:none;background:transparent;color:var(--ink);cursor:pointer;letter-spacing:-.5px;-webkit-appearance:none;appearance:none;padding-right:30px}
+  .origin-select::after{content:"\25be";position:absolute;right:4px;top:50%;transform:translateY(-50%);pointer-events:none;color:var(--accent);font-size:16px}
+  .count-field{flex:none;width:128px;border-left:2px solid var(--ink);padding:16px 18px;display:flex;flex-direction:column;justify-content:center;background:var(--ink);color:var(--paper)}
+  .count-field .n{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:34px;line-height:1}
+  .count-field .l{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;opacity:.7;margin-top:3px}
+
+  .prefs{padding:20px 18px 22px}
+  .pref{margin-bottom:24px}
+  .pref:last-child{margin-bottom:0}
+  .pref .sentence{font-family:'Newsreader',serif;font-size:18px;line-height:1.3;margin-bottom:12px}
+  .pref .sentence b{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-style:normal;color:var(--accent);font-size:18px}
+  .slider-track{position:relative;padding:0 2px}
+  input[type=range]{-webkit-appearance:none;width:100%;height:6px;border-radius:6px;border:1.5px solid var(--ink);cursor:pointer;background:linear-gradient(90deg,var(--accent2),var(--accent))}
+  .vibe input[type=range]{background:linear-gradient(90deg,#0a4f7a,#7fb3cc,var(--accent))}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:24px;height:24px;border-radius:50%;background:var(--card);border:3px solid var(--ink);cursor:grab;box-shadow:1px 2px 0 var(--ink)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--card);border:3px solid var(--ink)}
+  .ends{display:flex;justify-content:space-between;font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.5px;text-transform:uppercase;opacity:.5;margin-top:7px}
+
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-top:20px;padding-top:18px;border-top:2px dashed var(--hair)}
+  .chip{font-family:'DM Mono',monospace;font-size:12px;border:1.5px solid var(--ink);border-radius:30px;padding:7px 14px;cursor:pointer;background:transparent;color:var(--ink);transition:.13s;display:flex;align-items:center;gap:6px}
+  .chip:hover{background:rgba(16,36,58,.07)}
+  .chip.on{background:var(--ink);color:var(--paper)}
+  .chip .ic{font-size:13px}
+
+  .howbtn{font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;border:1.5px solid var(--ink);background:var(--accent2);border-radius:30px;padding:6px 13px;cursor:pointer;box-shadow:2px 2px 0 var(--ink)}
+  .howbtn:hover{transform:translate(-1px,-1px);box-shadow:3px 3px 0 var(--ink)}
+  .overlay{position:fixed;inset:0;background:rgba(16,36,58,.5);z-index:90;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+  .overlay.open{display:flex}
+  .modal{background:var(--card);border:2px solid var(--ink);box-shadow:8px 8px 0 var(--ink);max-width:540px;width:100%;padding:26px}
+  .modal h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:26px;letter-spacing:-1px;margin-bottom:4px}
+  .modal .sub{font-family:'DM Mono',monospace;font-size:11px;opacity:.6;margin-bottom:18px}
+  .modal h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:700;font-size:15px;margin:18px 0 6px;display:flex;align-items:center;gap:8px}
+  .modal p{font-size:14.5px;line-height:1.55;opacity:.85;margin-bottom:8px}
+  .realtag{font-family:'DM Mono',monospace;font-size:9px;letter-spacing:.5px;text-transform:uppercase;border-radius:20px;padding:2px 8px;border:1.5px solid var(--ink)}
+  .realtag.real{background:var(--good);color:#05300f;border-color:var(--good)}
+  .realtag.est{background:var(--suf);color:#3a2c00;border-color:var(--suf)}
+  .modal .closebtn{margin-top:20px;width:100%;font-family:'DM Mono',monospace;font-size:13px;border:2px solid var(--ink);background:var(--ink);color:var(--paper);padding:11px;border-radius:8px;cursor:pointer;letter-spacing:1px}
+
+  .results-head{display:flex;align-items:baseline;justify-content:space-between;margin:32px 2px 16px}
+  .results-head h2{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:24px;letter-spacing:-.8px}
+  .results-head .from{font-family:'DM Mono',monospace;font-size:12px;opacity:.6}
+
+  .card{background:var(--card);border:2px solid var(--ink);margin-bottom:16px;box-shadow:5px 5px 0 var(--ink);overflow:hidden;display:flex;transition:transform .14s,box-shadow .14s}
+  .card:hover{transform:translate(-2px,-2px);box-shadow:7px 7px 0 var(--ink)}
+  .card.top{box-shadow:5px 5px 0 var(--accent)}
+  .card.top:hover{box-shadow:7px 7px 0 var(--accent)}
+  .thumb{flex:none;width:138px;position:relative;border-right:2px solid var(--ink);overflow:hidden}
+  .thumb svg{width:100%;height:100%;display:block}
+  .rankbadge{position:absolute;top:8px;left:8px;background:var(--paper);border:2px solid var(--ink);font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:16px;width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+  .card.top .rankbadge{background:var(--accent2)}
+  .match-ring{position:absolute;bottom:8px;right:8px;font-family:'DM Mono',monospace;font-size:11px;font-weight:500;background:var(--ink);color:var(--paper);padding:3px 8px;border-radius:20px}
+  .body{flex:1;padding:14px 16px;min-width:0}
+  .body h3{font-family:'Bricolage Grotesque',sans-serif;font-weight:800;font-size:21px;letter-spacing:-.6px;line-height:1.02}
+  .meta{font-family:'DM Mono',monospace;font-size:11px;opacity:.6;margin-top:4px}
+  .tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
+  .tag{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.3px;border:1.5px solid var(--ink);border-radius:20px;padding:3px 9px}
+  .tag.exc{background:var(--exc);color:#fff;border-color:var(--exc)}
+  .tag.good{background:var(--good);color:#05300f;border-color:var(--good)}
+  .tag.suf{background:var(--suf);color:#3a2c00;border-color:var(--suf)}
+  .tag.poor{background:var(--poor);color:#fff;border-color:var(--poor)}
+  .reason{font-size:14.5px;line-height:1.5;margin-top:11px;opacity:.88}
+  .go{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:11px;letter-spacing:.5px;text-transform:uppercase;margin-top:12px;color:var(--ink);text-decoration:none;border-bottom:2px solid var(--accent);padding-bottom:1px}
+  .go:hover{color:var(--accent)}
+  @media(max-width:540px){.thumb{width:96px}.count-field{width:104px}}
+  .footnote{font-family:'DM Mono',monospace;font-size:10px;opacity:.5;text-align:center;margin-top:24px;line-height:1.6}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">England &amp; Wales · 108 beaches</div>
+    <h1>Find your <em>shoreline</em></h1>
+    <p class="standfirst">Pick where you're setting off from, slide to describe the beach you fancy, and we'll rank the best matches.</p>
+  </header>
+
+  <div class="panel">
+    <div class="panel-top">
+      <div class="origin-field">
+        <label>Setting off from</label>
+        <div class="origin-select"><select id="origin"></select></div>
+      </div>
+      <div class="count-field">
+        <div class="n" id="bigDist">—</div>
+        <div class="l">min to #1</div>
+      </div>
+    </div>
+    <div class="prefs">
+      <div class="pref dist">
+        <div class="sentence">I want somewhere <b id="vDist">an easy drive away</b></div>
+        <div class="slider-track"><input type="range" id="sDist" min="0" max="100" value="35"></div>
+        <div class="ends"><span>↞ Close to home</span><span>Happy to travel ↠</span></div>
+      </div>
+      <div class="pref vibe">
+        <div class="sentence">…and I'm after somewhere <b id="vVibe">nice and quiet</b></div>
+        <div class="slider-track"><input type="range" id="sVibe" min="0" max="100" value="25"></div>
+        <div class="ends"><span>↞ Peaceful &amp; quiet</span><span>Lively &amp; buzzy ↠</span></div>
+      </div>
+      <div class="filters">
+        <button class="chip" data-f="fossil"><span class="ic">🦖</span> Good for fossils</button>
+        <button class="chip" data-f="detect"><span class="ic">🔍</span> Metal detecting OK</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="results-head">
+    <h2>Your top beaches</h2>
+    <button class="howbtn" id="howBtn">ⓘ How this works</button>
+  </div>
+  <div class="from" id="fromTo" style="font-family:'DM Mono',monospace;font-size:12px;opacity:.6;margin:-8px 2px 14px">—</div>
+  <div id="results"></div>
+
+  <div class="footnote">Water quality shown on every beach (England EA + Wales NRW). Sample data with real locations &amp; typical quality bands.<br>Drive times estimated from distance. Run fetch_data.py for live classifications.</div>
+</div>
+
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <h2>How we pick your beaches</h2>
+    <div class="sub">Every beach gets a match score. Here's exactly what goes in — and what's real vs estimated.</div>
+
+    <h3>📍 Distance <span class="realtag real">Real</span></h3>
+    <p>Straight-line distance from your start point to each beach, from real coordinates. Your "drive time" slider widens or narrows how far counts as a good match. Drive <em>minutes</em> are estimated (distance ÷ ~72 km/h), not live routing.</p>
+
+    <h3>🌊 Water quality <span class="realtag est">Sample now · Real after pipeline</span></h3>
+    <p>Official bathing-water ratings (Excellent → Poor) from the Environment Agency (England) and Natural Resources Wales. Shown on every beach via the badge and the depth of blue in the picture. Currently typical sample bands; running fetch_data.py pulls the live classifications.</p>
+
+    <h3>🏖 Quiet vs lively <span class="realtag est">Estimated</span></h3>
+    <p>There's no public dataset counting people on a beach, so we estimate it from how busy the nearest counted road is (DfT traffic data) and how remote the beach is. Your "vibe" slider matches beaches to how quiet or lively you want.</p>
+
+    <h3>🦖 Fossils <span class="realtag real">Real (known sites)</span></h3>
+    <p>Flagged from documented fossil coastlines — the Jurassic Coast (Charmouth, Lyme Regis), Dunraven Bay, the Yorkshire coast and Folkestone. Always search loose on the beach, never dig the cliffs.</p>
+
+    <h3>🔍 Metal detecting <span class="realtag est">Guidance only</span></h3>
+    <p>Based on foreshore ownership: ~55% of UK foreshore is Crown Estate (detecting generally allowed between the tide lines), but National Trust beaches ban it and private land needs permission. This is a steer, not legal clearance — always confirm locally before you switch on.</p>
+
+    <button class="closebtn" id="closeBtn">Got it</button>
+  </div>
+</div>
+
+<script>
+const BEACHES_RAW = [{"name": "Bournemouth Pier", "lat": 50.713, "lng": -1.875, "class": "Excellent", "region": "Dorset", "fossil": false, "detect": "ok"}, {"name": "Boscombe", "lat": 50.721, "lng": -1.838, "class": "Excellent", "region": "Dorset", "fossil": false, "detect": "ok"}, {"name": "Sandbanks", "lat": 50.687, "lng": -1.938, "class": "Excellent", "region": "Dorset", "fossil": false, "detect": "ok"}, {"name": "Weymouth Central", "lat": 50.609, "lng": -2.452, "class": "Good", "region": "Dorset", "fossil": false, "detect": "ok"}, {"name": "Brighton Central", "lat": 50.819, "lng": -0.137, "class": "Good", "region": "East Sussex", "fossil": false, "detect": "ok"}, {"name": "Hove", "lat": 50.823, "lng": -0.171, "class": "Excellent", "region": "East Sussex", "fossil": false, "detect": "ok"}, {"name": "Camber", "lat": 50.933, "lng": 0.792, "class": "Excellent", "region": "East Sussex", "fossil": false, "detect": "ok"}, {"name": "Eastbourne", "lat": 50.762, "lng": 0.285, "class": "Excellent", "region": "East Sussex", "fossil": false, "detect": "ok"}, {"name": "Bexhill", "lat": 50.836, "lng": 0.47, "class": "Good", "region": "East Sussex", "fossil": false, "detect": "ok"}, {"name": "Littlehampton", "lat": 50.802, "lng": -0.54, "class": "Sufficient", "region": "West Sussex", "fossil": false, "detect": "ok"}, {"name": "West Wittering", "lat": 50.778, "lng": -0.911, "class": "Excellent", "region": "West Sussex", "fossil": false, "detect": "ok"}, {"name": "Bognor Regis", "lat": 50.782, "lng": -0.674, "class": "Good", "region": "West Sussex", "fossil": false, "detect": "ok"}, {"name": "Weston-super-Mare Main", "lat": 51.346, "lng": -2.983, "class": "Sufficient", "region": "Somerset", "fossil": false, "detect": "ok"}, {"name": "Burnham-on-Sea", "lat": 51.238, "lng": -3.001, "class": "Sufficient", "region": "Somerset", "fossil": false, "detect": "ok"}, {"name": "Minehead", "lat": 51.21, "lng": -3.475, "class": "Good", "region": "Somerset", "fossil": false, "detect": "ok"}, {"name": "Newquay Fistral", "lat": 50.416, "lng": -5.1, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Newquay Towan", "lat": 50.416, "lng": -5.086, "class": "Good", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "St Ives Porthmeor", "lat": 50.215, "lng": -5.484, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Porthtowan", "lat": 50.288, "lng": -5.241, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Perranporth", "lat": 50.345, "lng": -5.155, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Sennen Cove", "lat": 50.077, "lng": -5.7, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Polzeath", "lat": 50.575, "lng": -4.916, "class": "Excellent", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Bude Summerleaze", "lat": 50.834, "lng": -4.552, "class": "Good", "region": "Cornwall", "fossil": false, "detect": "ok"}, {"name": "Woolacombe", "lat": 51.171, "lng": -4.209, "class": "Excellent", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Croyde", "lat": 51.131, "lng": -4.241, "class": "Excellent", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Saunton Sands", "lat": 51.11, "lng": -4.215, "class": "Excellent", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Exmouth", "lat": 50.616, "lng": -3.397, "class": "Good", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Dawlish", "lat": 50.581, "lng": -3.464, "class": "Sufficient", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Torquay Abbey Sands", "lat": 50.461, "lng": -3.527, "class": "Good", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Paignton Sands", "lat": 50.434, "lng": -3.557, "class": "Good", "region": "Devon", "fossil": false, "detect": "ok"}, {"name": "Blackpool South", "lat": 53.785, "lng": -3.057, "class": "Good", "region": "Lancashire", "fossil": false, "detect": "ok"}, {"name": "Blackpool Central", "lat": 53.815, "lng": -3.055, "class": "Sufficient", "region": "Lancashire", "fossil": false, "detect": "ok"}, {"name": "Lytham St Annes", "lat": 53.745, "lng": -3.03, "class": "Good", "region": "Lancashire", "fossil": false, "detect": "ok"}, {"name": "Scarborough South Bay", "lat": 54.279, "lng": -0.395, "class": "Sufficient", "region": "North Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Scarborough North Bay", "lat": 54.29, "lng": -0.402, "class": "Good", "region": "North Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Whitby", "lat": 54.49, "lng": -0.613, "class": "Good", "region": "North Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Filey", "lat": 54.209, "lng": -0.288, "class": "Excellent", "region": "North Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Bridlington South", "lat": 54.078, "lng": -0.193, "class": "Good", "region": "East Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Bridlington North", "lat": 54.092, "lng": -0.188, "class": "Sufficient", "region": "East Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Hornsea", "lat": 53.911, "lng": -0.158, "class": "Good", "region": "East Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Skegness", "lat": 53.143, "lng": 0.339, "class": "Good", "region": "Lincolnshire", "fossil": false, "detect": "ok"}, {"name": "Mablethorpe", "lat": 53.341, "lng": 0.263, "class": "Good", "region": "Lincolnshire", "fossil": false, "detect": "ok"}, {"name": "Cleethorpes", "lat": 53.555, "lng": -0.022, "class": "Sufficient", "region": "Lincolnshire", "fossil": false, "detect": "ok"}, {"name": "Southend Thorpe Bay", "lat": 51.53, "lng": 0.745, "class": "Sufficient", "region": "Essex", "fossil": false, "detect": "ok"}, {"name": "Frinton", "lat": 51.832, "lng": 1.25, "class": "Excellent", "region": "Essex", "fossil": false, "detect": "ok"}, {"name": "Clacton", "lat": 51.789, "lng": 1.155, "class": "Good", "region": "Essex", "fossil": false, "detect": "ok"}, {"name": "Walton", "lat": 51.846, "lng": 1.273, "class": "Good", "region": "Essex", "fossil": false, "detect": "ok"}, {"name": "Great Yarmouth", "lat": 52.606, "lng": 1.732, "class": "Good", "region": "Norfolk", "fossil": false, "detect": "ok"}, {"name": "Cromer", "lat": 52.931, "lng": 1.302, "class": "Good", "region": "Norfolk", "fossil": false, "detect": "ok"}, {"name": "Hunstanton", "lat": 52.94, "lng": 0.486, "class": "Good", "region": "Norfolk", "fossil": false, "detect": "ok"}, {"name": "Wells-next-the-Sea", "lat": 52.965, "lng": 0.851, "class": "Excellent", "region": "Norfolk", "fossil": false, "detect": "ok"}, {"name": "Margate Main Sands", "lat": 51.389, "lng": 1.385, "class": "Good", "region": "Kent", "fossil": false, "detect": "ok"}, {"name": "Broadstairs Viking Bay", "lat": 51.359, "lng": 1.434, "class": "Excellent", "region": "Kent", "fossil": false, "detect": "ok"}, {"name": "Ramsgate Main Sands", "lat": 51.33, "lng": 1.421, "class": "Good", "region": "Kent", "fossil": false, "detect": "ok"}, {"name": "Whitstable", "lat": 51.36, "lng": 1.026, "class": "Sufficient", "region": "Kent", "fossil": false, "detect": "ok"}, {"name": "Folkestone", "lat": 51.078, "lng": 1.18, "class": "Good", "region": "Kent", "fossil": true, "detect": "ok"}, {"name": "Tynemouth Longsands", "lat": 55.02, "lng": -1.424, "class": "Excellent", "region": "Tyne & Wear", "fossil": false, "detect": "ok"}, {"name": "Whitley Bay", "lat": 55.043, "lng": -1.448, "class": "Good", "region": "Tyne & Wear", "fossil": false, "detect": "ok"}, {"name": "South Shields", "lat": 54.998, "lng": -1.43, "class": "Good", "region": "Tyne & Wear", "fossil": false, "detect": "ok"}, {"name": "Saltburn", "lat": 54.583, "lng": -0.972, "class": "Good", "region": "North Yorkshire", "fossil": true, "detect": "ok"}, {"name": "Barry Island Whitmore Bay", "lat": 51.393, "lng": -3.27, "class": "Good", "region": "Vale of Glamorgan", "fossil": false, "detect": "ok"}, {"name": "Penarth", "lat": 51.434, "lng": -3.171, "class": "Sufficient", "region": "Vale of Glamorgan", "fossil": true, "detect": "ok"}, {"name": "Southerndown (Dunraven)", "lat": 51.448, "lng": -3.605, "class": "Excellent", "region": "Vale of Glamorgan", "fossil": true, "detect": "ok"}, {"name": "Porthcawl Rest Bay", "lat": 51.487, "lng": -3.726, "class": "Excellent", "region": "Bridgend", "fossil": false, "detect": "ok"}, {"name": "Porthcawl Sandy Bay", "lat": 51.479, "lng": -3.696, "class": "Good", "region": "Bridgend", "fossil": false, "detect": "ok"}, {"name": "Aberavon", "lat": 51.585, "lng": -3.819, "class": "Good", "region": "Neath Port Talbot", "fossil": false, "detect": "ok"}, {"name": "Swansea Bay", "lat": 51.602, "lng": -3.967, "class": "Sufficient", "region": "Swansea", "fossil": false, "detect": "ok"}, {"name": "Caswell Bay", "lat": 51.571, "lng": -4.033, "class": "Excellent", "region": "Swansea", "fossil": false, "detect": "ok"}, {"name": "Langland Bay", "lat": 51.567, "lng": -4.005, "class": "Excellent", "region": "Swansea", "fossil": false, "detect": "ok"}, {"name": "Port Eynon", "lat": 51.541, "lng": -4.207, "class": "Excellent", "region": "Swansea", "fossil": false, "detect": "ok"}, {"name": "Rhossili", "lat": 51.568, "lng": -4.293, "class": "Excellent", "region": "Swansea", "fossil": false, "detect": "banned"}, {"name": "Oxwich Bay", "lat": 51.557, "lng": -4.171, "class": "Excellent", "region": "Swansea", "fossil": false, "detect": "ok"}, {"name": "Pendine", "lat": 51.735, "lng": -4.575, "class": "Good", "region": "Carmarthenshire", "fossil": false, "detect": "ok"}, {"name": "Tenby South", "lat": 51.668, "lng": -4.7, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "ok"}, {"name": "Tenby North", "lat": 51.676, "lng": -4.695, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "ok"}, {"name": "Saundersfoot", "lat": 51.711, "lng": -4.692, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "ok"}, {"name": "Barafundle (Stackpole)", "lat": 51.617, "lng": -4.905, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "banned"}, {"name": "Freshwater West", "lat": 51.658, "lng": -5.053, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "banned"}, {"name": "Broad Haven (North)", "lat": 51.778, "lng": -5.107, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "ok"}, {"name": "Newgale", "lat": 51.853, "lng": -5.14, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "banned"}, {"name": "Whitesands Bay", "lat": 51.896, "lng": -5.294, "class": "Excellent", "region": "Pembrokeshire", "fossil": false, "detect": "banned"}, {"name": "Poppit Sands", "lat": 52.087, "lng": -4.692, "class": "Good", "region": "Pembrokeshire", "fossil": false, "detect": "ok"}, {"name": "Aberporth", "lat": 52.13, "lng": -4.546, "class": "Excellent", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "Tresaith", "lat": 52.124, "lng": -4.512, "class": "Excellent", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "Llangrannog", "lat": 52.157, "lng": -4.47, "class": "Good", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "New Quay Harbour", "lat": 52.215, "lng": -4.358, "class": "Good", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "Aberystwyth North", "lat": 52.418, "lng": -4.085, "class": "Sufficient", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "Borth", "lat": 52.488, "lng": -4.052, "class": "Good", "region": "Ceredigion", "fossil": false, "detect": "ok"}, {"name": "Aberdovey", "lat": 52.544, "lng": -4.057, "class": "Excellent", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Tywyn", "lat": 52.583, "lng": -4.097, "class": "Good", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Barmouth", "lat": 52.72, "lng": -4.058, "class": "Good", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Harlech", "lat": 52.866, "lng": -4.123, "class": "Excellent", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Criccieth", "lat": 52.917, "lng": -4.231, "class": "Good", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Pwllheli (Glan-y-Mor)", "lat": 52.881, "lng": -4.412, "class": "Good", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Abersoch", "lat": 52.825, "lng": -4.503, "class": "Excellent", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Whistling Sands (Porthor)", "lat": 52.815, "lng": -4.7, "class": "Excellent", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Nefyn", "lat": 52.937, "lng": -4.519, "class": "Excellent", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Dinas Dinlle", "lat": 53.025, "lng": -4.339, "class": "Good", "region": "Gwynedd", "fossil": false, "detect": "ok"}, {"name": "Llandudno North Shore", "lat": 53.328, "lng": -3.826, "class": "Sufficient", "region": "Conwy", "fossil": false, "detect": "ok"}, {"name": "Llandudno West Shore", "lat": 53.32, "lng": -3.847, "class": "Good", "region": "Conwy", "fossil": false, "detect": "ok"}, {"name": "Colwyn Bay", "lat": 53.295, "lng": -3.726, "class": "Good", "region": "Conwy", "fossil": false, "detect": "ok"}, {"name": "Rhos-on-Sea", "lat": 53.311, "lng": -3.737, "class": "Good", "region": "Conwy", "fossil": false, "detect": "ok"}, {"name": "Prestatyn", "lat": 53.342, "lng": -3.404, "class": "Good", "region": "Denbighshire", "fossil": false, "detect": "ok"}, {"name": "Rhyl", "lat": 53.321, "lng": -3.493, "class": "Sufficient", "region": "Denbighshire", "fossil": false, "detect": "ok"}, {"name": "Benllech (Anglesey)", "lat": 53.33, "lng": -4.225, "class": "Excellent", "region": "Anglesey", "fossil": false, "detect": "ok"}, {"name": "Trearddur Bay (Anglesey)", "lat": 53.281, "lng": -4.625, "class": "Excellent", "region": "Anglesey", "fossil": false, "detect": "ok"}, {"name": "Llanddwyn (Newborough)", "lat": 53.139, "lng": -4.376, "class": "Excellent", "region": "Anglesey", "fossil": false, "detect": "ok"}, {"name": "Rhosneigr (Anglesey)", "lat": 53.232, "lng": -4.514, "class": "Excellent", "region": "Anglesey", "fossil": false, "detect": "ok"}];
+const POINTS = [
+  {n:"Bournemouth seafront (A338)",r:"Dorset",lat:50.717,lng:-1.875,aadf:48000,type:"beach",road:"A338"},
+  {n:"Brighton seafront (A259)",r:"East Sussex",lat:50.819,lng:-0.137,aadf:39000,type:"beach",road:"A259"},
+  {n:"Camber Sands approach",r:"East Sussex",lat:50.933,lng:0.792,aadf:8500,type:"beach",road:"A259"},
+  {n:"Weston-super-Mare front",r:"Somerset",lat:51.346,lng:-2.983,aadf:26000,type:"beach",road:"A370"},
+  {n:"Blackpool Promenade",r:"Lancashire",lat:53.815,lng:-3.055,aadf:34000,type:"beach",road:"A584"},
+  {n:"Newquay (A392)",r:"Cornwall",lat:50.413,lng:-5.080,aadf:18000,type:"beach",road:"A392"},
+  {n:"Skegness front",r:"Lincolnshire",lat:53.143,lng:0.339,aadf:15000,type:"beach",road:"A52"},
+  {n:"Southend seafront",r:"Essex",lat:51.535,lng:0.715,aadf:31000,type:"beach",road:"A13"},
+  {n:"Scarborough (A165)",r:"North Yorkshire",lat:54.273,lng:-0.401,aadf:17000,type:"beach",road:"A165"},
+  {n:"St Ives approach",r:"Cornwall",lat:50.211,lng:-5.480,aadf:9500,type:"beach",road:"A3074"},
+  {n:"Sennen lane",r:"Cornwall",lat:50.077,lng:-5.700,aadf:2200,type:"beach",road:"B3306"},
+  {n:"Llandudno promenade",r:"Conwy",lat:53.328,lng:-3.826,aadf:16500,type:"beach",road:"A546"},
+  {n:"Whitby (A171)",r:"North Yorkshire",lat:54.486,lng:-0.615,aadf:11000,type:"beach",road:"A171"},
+  {n:"Bridlington front",r:"East Yorkshire",lat:54.083,lng:-0.190,aadf:13500,type:"beach",road:"A165"},
+  {n:"Woolacombe lane",r:"Devon",lat:51.171,lng:-4.209,aadf:4200,type:"beach",road:"B3343"},
+  {n:"Wells-next-the-Sea",r:"Norfolk",lat:52.965,lng:0.851,aadf:3800,type:"beach",road:"A149"},
+  {n:"Box Hill (A24)",r:"Surrey",lat:51.252,lng:-0.314,aadf:29000,type:"country",road:"A24"},
+  {n:"Lake District (A591)",r:"Cumbria",lat:54.428,lng:-2.963,aadf:9800,type:"country",road:"A591"},
+  {n:"Peak District (A6)",r:"Derbyshire",lat:53.214,lng:-1.675,aadf:14200,type:"country",road:"A6"},
+  {n:"New Forest (A35)",r:"Hampshire",lat:50.870,lng:-1.640,aadf:16800,type:"country",road:"A35"},
+  {n:"Birmingham A38(M)",r:"West Midlands",lat:52.503,lng:-1.890,aadf:88000,type:"commuter",road:"A38(M)"},
+  {n:"Manchester Mancunian Way",r:"Greater Manchester",lat:53.470,lng:-2.234,aadf:79000,type:"commuter",road:"A57(M)"},
+  {n:"Bristol (A4032 centre)",r:"Bristol",lat:51.460,lng:-2.580,aadf:41000,type:"commuter",road:"A4032"},
+  {n:"Leeds inner ring (A58M)",r:"West Yorkshire",lat:53.802,lng:-1.543,aadf:62000,type:"commuter",road:"A58(M)"},
+  {n:"London A40 Westway",r:"Greater London",lat:51.519,lng:-0.205,aadf:95000,type:"commuter",road:"A40"},
+  {n:"Sheffield (A61)",r:"South Yorkshire",lat:53.385,lng:-1.470,aadf:52000,type:"commuter",road:"A61"},
+  {n:"Newcastle (A167)",r:"Tyne & Wear",lat:54.972,lng:-1.616,aadf:46000,type:"commuter",road:"A167"},
+  {n:"Swindon (Magic Rbt A4259)",r:"Wiltshire",lat:51.561,lng:-1.776,aadf:33000,type:"commuter",road:"A4259"},
+  {n:"M25 J10 (A3)",r:"Surrey",lat:51.310,lng:-0.440,aadf:196000,type:"motorway",road:"M25"},
+  {n:"M6 J6 Spaghetti Jn",r:"West Midlands",lat:52.510,lng:-1.860,aadf:178000,type:"motorway",road:"M6"},
+  {n:"M5 J20 Clevedon",r:"Somerset",lat:51.430,lng:-2.840,aadf:84000,type:"motorway",road:"M5"},
+  {n:"M1 J23 Leicester",r:"Leicestershire",lat:52.700,lng:-1.220,aadf:132000,type:"motorway",road:"M1"},
+  {n:"A30 Bodmin (SW getaway)",r:"Cornwall",lat:50.470,lng:-4.720,aadf:38000,type:"motorway",road:"A30"},
+  {n:"A303 Stonehenge",r:"Wiltshire",lat:51.180,lng:-1.830,aadf:26000,type:"motorway",road:"A303"},
+  {n:"Barry Island (B4267)",r:"Vale of Glamorgan",lat:51.393,lng:-3.270,aadf:21000,type:"beach",road:"B4267"},
+  {n:"Porthcawl (A4106)",r:"Bridgend",lat:51.487,lng:-3.726,aadf:14500,type:"beach",road:"A4106"},
+  {n:"Swansea Bay (A4067)",r:"Swansea",lat:51.602,lng:-3.967,aadf:28000,type:"beach",road:"A4067"},
+  {n:"Rhossili lane (B4247)",r:"Swansea",lat:51.568,lng:-4.293,aadf:2400,type:"beach",road:"B4247"},
+  {n:"Tenby (A4139)",r:"Pembrokeshire",lat:51.672,lng:-4.703,aadf:7800,type:"beach",road:"A4139"},
+  {n:"Whitesands lane (B4583)",r:"Pembrokeshire",lat:51.896,lng:-5.294,aadf:1900,type:"beach",road:"B4583"},
+  {n:"Newgale (A487)",r:"Pembrokeshire",lat:51.853,lng:-5.140,aadf:5600,type:"beach",road:"A487"},
+  {n:"Aberystwyth (A487)",r:"Ceredigion",lat:52.418,lng:-4.085,aadf:13200,type:"beach",road:"A487"},
+  {n:"Barmouth (A496)",r:"Gwynedd",lat:52.720,lng:-4.058,aadf:6400,type:"beach",road:"A496"},
+  {n:"Abersoch lane (A499)",r:"Gwynedd",lat:52.825,lng:-4.503,aadf:3800,type:"beach",road:"A499"},
+  {n:"Porthor lane (B4413)",r:"Gwynedd",lat:52.815,lng:-4.700,aadf:1200,type:"beach",road:"B4413"},
+  {n:"Llandudno promenade (A546)",r:"Conwy",lat:53.328,lng:-3.826,aadf:16500,type:"beach",road:"A546"},
+  {n:"Colwyn Bay (A55)",r:"Conwy",lat:53.295,lng:-3.726,aadf:48000,type:"beach",road:"A55"},
+  {n:"Rhyl (A548)",r:"Denbighshire",lat:53.321,lng:-3.493,aadf:22000,type:"beach",road:"A548"},
+  {n:"Trearddur Bay (B4545)",r:"Anglesey",lat:53.281,lng:-4.625,aadf:3100,type:"beach",road:"B4545"},
+  {n:"Rhosneigr (A4080)",r:"Anglesey",lat:53.232,lng:-4.514,aadf:4200,type:"beach",road:"A4080"},
+  {n:"Cardiff (A470 centre)",r:"Cardiff",lat:51.488,lng:-3.180,aadf:44000,type:"commuter",road:"A470"},
+  {n:"Newport (M4 J24)",r:"Newport",lat:51.560,lng:-2.960,aadf:108000,type:"motorway",road:"M4"},
+  {n:"A55 Bangor (N Wales artery)",r:"Gwynedd",lat:53.225,lng:-4.130,aadf:52000,type:"motorway",road:"A55"},
+];
+const CITIES = [{"name": "London", "lat": 51.507, "lng": -0.128, "pop": 9000000}, {"name": "Birmingham", "lat": 52.486, "lng": -1.89, "pop": 2600000}, {"name": "Manchester", "lat": 53.48, "lng": -2.242, "pop": 2800000}, {"name": "Leeds", "lat": 53.801, "lng": -1.549, "pop": 1900000}, {"name": "Bristol", "lat": 51.454, "lng": -2.588, "pop": 700000}, {"name": "Sheffield", "lat": 53.383, "lng": -1.467, "pop": 750000}, {"name": "Cardiff", "lat": 51.481, "lng": -3.179, "pop": 490000}, {"name": "Liverpool", "lat": 53.408, "lng": -2.991, "pop": 900000}, {"name": "Newcastle", "lat": 54.978, "lng": -1.618, "pop": 810000}, {"name": "Nottingham", "lat": 52.954, "lng": -1.158, "pop": 730000}, {"name": "Swansea", "lat": 51.622, "lng": -3.944, "pop": 300000}, {"name": "Swindon", "lat": 51.561, "lng": -1.776, "pop": 230000}, {"name": "Reading", "lat": 51.454, "lng": -0.974, "pop": 340000}, {"name": "Coventry", "lat": 52.408, "lng": -1.51, "pop": 370000}, {"name": "Leicester", "lat": 52.637, "lng": -1.139, "pop": 560000}];
+
+const CLASS_SCORE={Excellent:1.0,Good:0.78,Sufficient:0.5,Poor:0.15};
+const CLASS_TAG={Excellent:'exc',Good:'good',Sufficient:'suf',Poor:'poor'};
+function clamp(v,a,b){return Math.max(a,Math.min(b,v))}
+function distKm(a,b,c,d){const p=Math.PI/180;const dy=(c-a),dx=(d-b)*Math.cos((a+c)/2*p);return Math.sqrt(dy*dy+dx*dx)*111;}
+const driveMin=km=>Math.round(km/72*60);
+
+const BEACHES=BEACHES_RAW.map(b=>{let best=null,bd=1e9;POINTS.forEach(p=>{const dd=distKm(b.lat,b.lng,p.lat,p.lng);if(dd<bd){bd=dd;best=p;}});return{...b,nearRoad:best,nearKm:Math.round(bd)};});
+const maxFlow=Math.max(...BEACHES.map(b=>b.nearRoad?b.nearRoad.aadf:1));
+function busyness(b){const base=b.nearRoad?b.nearRoad.aadf/maxFlow:0.2;const remote=clamp(b.nearKm/14,0,1);return clamp(base-remote*0.5,0,1);}
+
+function seaColour(cls){return cls==='Excellent'?'#0a4f7a':cls==='Good'?'#1f78a8':cls==='Sufficient'?'#4ba3c9':'#8fc0d6';}
+function thumb(b){
+  const sea=seaColour(b.class);
+  const sea2=b.class==='Excellent'?'#0d6294':b.class==='Good'?'#2f8fc0':'#69b3d4';
+  return `<svg viewBox="0 0 138 150" preserveAspectRatio="xMidYMid slice">
+    <defs><linearGradient id="sky${b._id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#cfe9f2"/><stop offset="1" stop-color="#eaf4ef"/></linearGradient>
+    <linearGradient id="sea${b._id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${sea2}"/><stop offset="1" stop-color="${sea}"/></linearGradient></defs>
+    <rect width="138" height="150" fill="url(#sky${b._id})"/>
+    <circle cx="108" cy="30" r="15" fill="#ffd23f"/>
+    <rect y="66" width="138" height="44" fill="url(#sea${b._id})"/>
+    <path d="M0 70 Q23 66 46 70 T92 70 T138 70" stroke="#fff" stroke-width="1.5" fill="none" opacity=".45"/>
+    <path d="M0 82 Q30 78 60 82 T138 82" stroke="#fff" stroke-width="1.5" fill="none" opacity=".3"/>
+    <path d="M0 104 Q34 94 70 104 T138 102 V150 H0Z" fill="#e7d6ad"/>
+    <path d="M0 112 Q40 104 80 112 T138 110 V150 H0Z" fill="#efe2c2" opacity=".7"/></svg>`;
+}
+BEACHES.forEach((b,i)=>b._id=i);
+
+let pref={dist:35,vibe:25};
+let filters={fossil:false,detect:false};
+
+function distPhrase(v){return v<25?'right on my doorstep':v<55?'an easy drive away':v<80?'worth a bit of a drive':'anywhere, near or far';}
+function vibePhrase(v){return v<25?'nice and quiet':v<55?'fairly relaxed':v<80?'with a bit of life':'lively and buzzy';}
+
+function score(b,origin){
+  const km=distKm(origin.lat,origin.lng,b.lat,b.lng);
+  const farTol=0.15+pref.dist/100*0.85;
+  const distFit=clamp(1-(km/300)/farTol,0,1);
+  const busy=busyness(b);
+  const want=pref.vibe/100;
+  const vibeFit=1-Math.abs(busy-want);
+  const qual=CLASS_SCORE[b.class]||0.4;
+  const match=0.46*distFit+0.34*vibeFit+0.20*qual;
+  return {km,match,busy};
+}
+function reasonText(b,s){
+  const bits=[];
+  if(s.km<60)bits.push("barely a drive");else if(s.km<140)bits.push("an easy run out");else bits.push("a proper day-trip");
+  if(s.busy<0.3)bits.push("usually calm and uncrowded");else if(s.busy<0.6)bits.push("a steady, sociable buzz");else bits.push("lively and popular");
+  if(b.class==='Excellent')bits.push("with top-rated water");else if(b.class==='Good')bits.push("with good clean water");else bits.push("water rated "+b.class.toLowerCase());
+  return bits.join(", ")+".";
+}
+
+const ORIGINS=[...CITIES].sort((a,b)=>a.name.localeCompare(b.name));
+const selOrigin=document.getElementById('origin');
+ORIGINS.forEach((c,i)=>{const o=document.createElement('option');o.value=i;o.textContent=c.name;selOrigin.appendChild(o);});
+selOrigin.value=ORIGINS.findIndex(c=>c.name==='Swindon');
+
+function render(){
+  const origin=ORIGINS[+selOrigin.value];
+  document.getElementById('fromTo').textContent='from '+origin.name;
+  document.getElementById('vDist').textContent=distPhrase(pref.dist);
+  document.getElementById('vVibe').textContent=vibePhrase(pref.vibe);
+  let pool=BEACHES;
+  if(filters.fossil)pool=pool.filter(b=>b.fossil);
+  if(filters.detect)pool=pool.filter(b=>b.detect==='ok');
+  const ranked=pool.map(b=>({b,s:score(b,origin)})).sort((a,b)=>b.s.match-a.s.match).slice(0,8);
+  document.getElementById('bigDist').textContent=ranked.length?driveMin(ranked[0].s.km):'—';
+  const R=document.getElementById('results');R.innerHTML='';
+  if(!ranked.length){R.innerHTML='<div class="footnote" style="opacity:.8;font-size:13px">No beaches match those filters — try turning one off.</div>';return;}
+  ranked.forEach(({b,s},i)=>{
+    const busyLabel=s.busy<0.3?'Quiet':s.busy<0.6?'Moderate':'Busy';
+    const extra=[];
+    if(b.fossil)extra.push('<span class="tag">🦖 Fossils</span>');
+    if(b.detect==='ok')extra.push('<span class="tag">🔍 Detecting OK</span>');
+    else extra.push('<span class="tag">🚫 No detecting</span>');
+    const card=document.createElement('div');card.className='card'+(i===0?' top':'');
+    card.innerHTML=`
+      <div class="thumb">${thumb(b)}<div class="rankbadge">${i+1}</div><div class="match-ring">${Math.round(s.match*100)}% match</div></div>
+      <div class="body">
+        <h3>${b.name}</h3>
+        <div class="meta">${b.region} · ${Math.round(s.km)} km · ~${driveMin(s.km)} min</div>
+        <div class="tags"><span class="tag ${CLASS_TAG[b.class]}">${b.class} water</span><span class="tag">${busyLabel}</span>${extra.join('')}</div>
+        <div class="reason">${reasonText(b,s)}</div>
+        <a class="go" href="https://www.google.com/maps/dir/?api=1&origin=${origin.lat},${origin.lng}&destination=${b.lat},${b.lng}" target="_blank" rel="noopener">Get directions →</a>
+      </div>`;
+    R.appendChild(card);
+  });
+}
+document.getElementById('sDist').oninput=e=>{pref.dist=+e.target.value;render();};
+document.getElementById('sVibe').oninput=e=>{pref.vibe=+e.target.value;render();};
+selOrigin.onchange=render;
+document.querySelectorAll('.chip').forEach(ch=>ch.onclick=()=>{const f=ch.dataset.f;filters[f]=!filters[f];ch.classList.toggle('on',filters[f]);render();});
+document.getElementById('howBtn').onclick=()=>document.getElementById('overlay').classList.add('open');
+document.getElementById('closeBtn').onclick=()=>document.getElementById('overlay').classList.remove('open');
+document.getElementById('overlay').onclick=e=>{if(e.target.id==='overlay')document.getElementById('overlay').classList.remove('open');};
+render();
+</script>
+
+</body>
+</html>
