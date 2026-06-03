@@ -100,7 +100,7 @@ function thumbBold(h, pattern) {
 const PROJECTS = [
     {
         "slug": "shoreline",
-        "path": "/shoreline/",
+        "path": "/apps/shoreline/",
         "uses": 0,
         "hue": 220,
         "pattern": "waves",
