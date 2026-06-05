@@ -27,6 +27,33 @@ let redoStack = [];
 let painting = false;
 let currentStroke = null;
 
+const STORAGE_KEY = 'hose-planner-v1';
+
+function saveState() {
+    const data = {
+        plants: [...plants],
+        strokes: strokes.map(s => ({
+            color: s.color,
+            thickness: s.thickness,
+            points: s.points.map(p => ({ x: p.x / W, y: p.y / H })),
+        })),
+    };
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+}
+
+function loadState() {
+    try {
+        const data = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (!data) return;
+        (data.plants ?? []).forEach(k => plants.add(k));
+        strokes = (data.strokes ?? []).map(s => ({
+            color: s.color,
+            thickness: s.thickness,
+            points: s.points.map(p => ({ x: p.x * W, y: p.y * H })),
+        }));
+    } catch {}
+}
+
 function resize() {
     const w = gridCanvas.parentElement.offsetWidth;
     const totalGapX = GAP * (COLS + 1);
@@ -39,6 +66,12 @@ function resize() {
     [gridCanvas, drawCanvas].forEach(c => { c.width = W; c.height = H; });
     drawGrid();
     redrawStrokes();
+}
+
+let loaded = false;
+function resizeAndLoad() {
+    resize();
+    if (!loaded) { loadState(); loaded = true; drawGrid(); redrawStrokes(); updateButtons(); updateStatus(); }
 }
 
 function cellRect(col, row) {
@@ -125,6 +158,7 @@ function togglePlant(x, y) {
         if (plants.has(key)) plants.delete(key);
         else plants.add(key);
         drawGrid();
+        saveState();
     }
 }
 
@@ -155,6 +189,7 @@ window.addEventListener('mouseup', (e) => {
         strokes.push(currentStroke);
         updateStatus();
         updateButtons();
+        saveState();
     }
     currentStroke = null;
 });
@@ -188,6 +223,7 @@ window.addEventListener('touchend', (e) => {
         strokes.push(currentStroke);
         updateStatus();
         updateButtons();
+        saveState();
     }
     currentStroke = null;
 });
@@ -211,6 +247,7 @@ btnUndo.addEventListener('click', () => {
     redrawStrokes();
     updateStatus();
     updateButtons();
+    saveState();
 });
 
 btnRedo.addEventListener('click', () => {
@@ -219,14 +256,18 @@ btnRedo.addEventListener('click', () => {
     redrawStrokes();
     updateStatus();
     updateButtons();
+    saveState();
 });
 
 btnClear.addEventListener('click', () => {
     redoStack = [...strokes, ...redoStack];
     strokes = [];
+    plants.clear();
     redrawStrokes();
+    drawGrid();
     updateStatus();
     updateButtons();
+    saveState();
 });
 
 function updateButtons() {
@@ -241,4 +282,4 @@ function updateStatus() {
 }
 
 window.addEventListener('resize', resize);
-resize();
+resizeAndLoad();
