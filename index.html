@@ -2,39 +2,530 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Allotment Hose Planner</title>
-    <link rel="stylesheet" href="./style.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sundry</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Space+Mono:wght@400;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="./shared/design.css" />
+    <style>
+        :root {
+            --header: oklch(0.88 0.072 268);
+            --active: oklch(0.82 0.145 33);
+        }
+
+        body {
+            background:
+                radial-gradient(oklch(0.2 0.02 60/.07) 1.5px, transparent 1.6px) 0 0/22px 22px,
+                var(--paper);
+        }
+
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 60;
+            background: color-mix(in oklab, var(--header) 90%, transparent);
+            backdrop-filter: blur(10px);
+            border-bottom: 2.5px solid var(--ink);
+        }
+
+        .bar {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            height: 72px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 11px;
+            flex: none;
+        }
+
+        .brand .mark {
+            width: 32px;
+            height: 32px;
+            border: 2.5px solid var(--ink);
+            border-radius: 9px;
+            background: oklch(0.78 0.17 30);
+            box-shadow: 3px 3px 0 var(--ink);
+            display: grid;
+            place-items: center;
+            transition: transform .3s var(--spring);
+        }
+
+        .brand .mark::after {
+            content: "";
+            width: 12px;
+            height: 12px;
+            border-radius: 4px;
+            background: var(--ink);
+        }
+
+        .brand:hover .mark {
+            transform: rotate(-8deg) scale(1.05);
+        }
+
+        .brand b {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 22px;
+            letter-spacing: -.03em;
+        }
+
+        .brand b span {
+            color: var(--faint);
+        }
+
+        .search {
+            flex: 1;
+            min-width: 120px;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search svg {
+            position: absolute;
+            left: 15px;
+            width: 17px;
+            height: 17px;
+            color: var(--soft);
+            pointer-events: none;
+        }
+
+        .search input {
+            width: 100%;
+            font: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            padding: 11px 14px 11px 42px;
+            border: 2.5px solid var(--ink);
+            border-radius: 13px;
+            background: var(--card);
+            color: var(--ink);
+            box-shadow: 3px 3px 0 var(--ink);
+            transition: box-shadow .15s, transform .15s;
+        }
+
+        .search input::placeholder {
+            color: var(--faint);
+            font-weight: 500;
+        }
+
+        .search input:focus {
+            outline: none;
+            transform: translate(-1px, -1px);
+            box-shadow: 4px 4px 0 oklch(0.72 0.16 33);
+        }
+
+        .seg {
+            display: flex;
+            border: 2.5px solid var(--ink);
+            border-radius: 13px;
+            overflow: hidden;
+            box-shadow: 3px 3px 0 var(--ink);
+            flex: none;
+        }
+
+        .seg button {
+            font-family: var(--font-display);
+            font-weight: 700;
+            font-size: 13.5px;
+            color: var(--ink);
+            white-space: nowrap;
+            background: var(--card);
+            border: none;
+            cursor: pointer;
+            padding: 11px 15px;
+            transition: background .15s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .seg button+button {
+            border-left: 2.5px solid var(--ink);
+        }
+
+        .seg button[aria-pressed="true"] {
+            background: var(--active);
+        }
+
+        .seg.icons button {
+            padding: 11px 12px;
+        }
+
+        .seg svg {
+            width: 17px;
+            height: 17px;
+            display: block;
+        }
+
+        .lbl-hide {}
+
+        @media(max-width: 720px) {
+            .brand b {
+                display: none;
+            }
+
+            .lbl-hide {
+                display: none;
+            }
+        }
+
+        @media(max-width: 520px) {
+            .bar {
+                flex-wrap: wrap;
+                height: auto;
+                padding: 12px 0;
+                gap: 10px;
+            }
+
+            .search {
+                order: 3;
+                flex-basis: 100%;
+            }
+        }
+
+        .strip {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 22px 0 6px;
+            flex-wrap: wrap;
+        }
+
+        .strip .count {
+            font-family: var(--font-mono);
+            font-size: 12.5px;
+            font-weight: 700;
+            color: var(--faint);
+        }
+
+        .strip .count b {
+            color: var(--ink);
+        }
+
+        .strip .hint {
+            font-family: var(--font-mono);
+            font-size: 11.5px;
+            color: var(--faint);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(244px, 1fr));
+            gap: 20px;
+            padding: 14px 0 70px;
+        }
+
+        .tile {
+            display: flex;
+            flex-direction: column;
+            border: 2.5px solid var(--ink);
+            border-radius: 22px 19px 24px 20px;
+            background: var(--card);
+            overflow: hidden;
+            box-shadow: 5px 5px 0 0 var(--pop), 5px 5px 0 1.5px var(--ink);
+            transition: transform .2s var(--spring), box-shadow .2s var(--spring);
+        }
+
+        .tile:hover {
+            transform: translate(-3px, -3px);
+            box-shadow: 9px 9px 0 0 var(--pop), 9px 9px 0 1.5px var(--ink);
+        }
+
+        .tile:active {
+            transform: translate(0, 0);
+            box-shadow: 3px 3px 0 0 var(--pop), 3px 3px 0 1.5px var(--ink);
+        }
+
+        .tile-art {
+            position: relative;
+            aspect-ratio: 16/10;
+            background-size: cover;
+            background-position: center;
+            border-bottom: 2.5px solid var(--ink);
+            overflow: hidden;
+        }
+
+        .tile-art::after {
+            content: "↗";
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            border-radius: 9px;
+            border: 2px solid var(--ink);
+            background: var(--paper);
+            display: grid;
+            place-items: center;
+            font-weight: 700;
+            font-size: 15px;
+            transform: scale(0) rotate(-20deg);
+            transition: transform .25s var(--spring);
+        }
+
+        .tile:hover .tile-art::after {
+            transform: scale(1) rotate(0);
+        }
+
+        .tile-body {
+            padding: 15px 16px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            flex: 1;
+        }
+
+        .tile-top {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+
+        .tile-name {
+            font-family: var(--font-display);
+            font-weight: 800;
+            font-size: 19px;
+            letter-spacing: -.02em;
+        }
+
+        .chip {
+            font-size: 11px;
+            font-weight: 700;
+            border: 2px solid var(--ink);
+            border-radius: 999px;
+            padding: 2px 9px;
+            background: var(--pop-soft);
+            white-space: nowrap;
+            transform: rotate(-1.5deg);
+        }
+
+        .tile-blurb {
+            font-size: 13.5px;
+            color: var(--soft);
+            font-weight: 500;
+            flex: 1;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .tile-foot {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 2px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--faint);
+        }
+
+        .tile-foot .launch {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            color: var(--ink);
+        }
+
+        .list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            padding: 14px 0 70px;
+        }
+
+        .list .tile {
+            flex-direction: row;
+            align-items: center;
+            gap: 18px;
+            padding: 14px;
+        }
+
+        .list .tile-art {
+            width: 72px;
+            height: 72px;
+            aspect-ratio: auto;
+            border: 2.5px solid var(--ink);
+            border-radius: 14px;
+            flex: none;
+        }
+
+        .list .tile-art::after {
+            display: none;
+        }
+
+        .list .tile-body {
+            padding: 0;
+            gap: 4px;
+        }
+
+        .list .tile-blurb {
+            -webkit-line-clamp: 1;
+            white-space: nowrap;
+            max-width: 52ch;
+        }
+
+        .list .tile-meta {
+            display: flex;
+            align-items: center;
+            gap: 18px;
+            flex: none;
+            margin-left: auto;
+        }
+
+        .list .r-m {
+            text-align: right;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            line-height: 1.5;
+            color: var(--faint);
+            font-weight: 700;
+        }
+
+        .list .r-m b {
+            display: block;
+            color: var(--ink);
+            font-size: 13px;
+        }
+
+        .list .go {
+            width: 42px;
+            height: 42px;
+            border-radius: 12px;
+            border: 2.5px solid var(--ink);
+            display: grid;
+            place-items: center;
+            background: var(--pop);
+            transition: transform .2s var(--spring);
+        }
+
+        .list .tile:hover .go {
+            transform: rotate(8deg) scale(1.06);
+        }
+
+        .list .go svg {
+            width: 17px;
+            height: 17px;
+        }
+
+        .list .tile-foot {
+            display: none;
+        }
+
+        @media(max-width: 640px) {
+            .list .tile-meta {
+                display: none;
+            }
+
+            .list .tile-foot {
+                display: flex;
+            }
+
+            .list .tile-blurb {
+                white-space: normal;
+            }
+        }
+
+        .empty {
+            text-align: center;
+            padding: 70px 0;
+            color: var(--faint);
+        }
+
+        .empty b {
+            display: block;
+            font-family: var(--font-display);
+            color: var(--ink);
+            font-size: 24px;
+            margin-bottom: 6px;
+            font-weight: 800;
+        }
+
+        footer {
+            border-top: 2.5px solid var(--ink);
+            margin-top: 8px;
+            padding: 24px 0 56px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        footer .brand b {
+            font-size: 16px;
+        }
+
+        footer span {
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--faint);
+            font-weight: 700;
+        }
+    </style>
 </head>
 
 <body>
-    <div class="wrap">
-        <h2 class="sr-only">Allotment hose planner — draw watering routes over your plot grid</h2>
-
-        <div class="toolbar">
-            <label>Hose colour:</label>
-            <span class="swatch sel" style="background:#1D9E75" data-color="#1D9E75" title="Green"></span>
-            <span class="swatch" style="background:#378ADD" data-color="#378ADD" title="Blue"></span>
-            <span class="swatch" style="background:#D85A30" data-color="#D85A30" title="Orange"></span>
-            <span class="swatch" style="background:#888780" data-color="#888780" title="Grey"></span>
-            <label style="margin-left:8px">Width:</label>
-            <input type="range" min="3" max="20" value="8" step="1" id="thickness" style="width:80px">
-            <span id="thick-out" style="font-size:13px;min-width:24px">8</span>
-            <button id="btn-undo" disabled>↩ Undo</button>
-            <button id="btn-redo" disabled>↪ Redo</button>
-            <button id="btn-clear">Clear hoses</button>
+    <header>
+        <div class="wrap bar">
+            <a class="brand" href="/"><span class="mark"></span><b>Sundry<span>/</span></b></a>
+            <label class="search">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round">
+                    <circle cx="11" cy="11" r="7" />
+                    <path d="m20 20-3.2-3.2" />
+                </svg>
+                <input id="q" type="search" placeholder="Search apps &amp; games…" autocomplete="off" />
+            </label>
+            <div class="seg" role="group" aria-label="Sort">
+                <button data-sort="new" aria-pressed="true">Newest</button>
+                <button data-sort="pop" aria-pressed="false">Popular</button>
+            </div>
+            <div class="seg icons" role="group" aria-label="View">
+                <button data-view="grid" aria-pressed="true" title="Grid">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                        <rect x="3" y="3" width="7" height="7" rx="1.5" />
+                        <rect x="14" y="3" width="7" height="7" rx="1.5" />
+                        <rect x="3" y="14" width="7" height="7" rx="1.5" />
+                        <rect x="14" y="14" width="7" height="7" rx="1.5" />
+                    </svg>
+                </button>
+                <button data-view="list" aria-pressed="false" title="List">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                        stroke-linecap="round">
+                        <path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />
+                    </svg>
+                </button>
+            </div>
         </div>
+    </header>
 
-        <div class="canvas-wrap">
-            <canvas id="grid-canvas"></canvas>
-            <canvas id="draw-canvas"
-                style="position:absolute;top:0;left:0;width:100%;cursor:crosshair;touch-action:none;border-radius:var(--border-radius-lg)"></canvas>
+    <main class="wrap">
+        <div class="strip">
+            <div class="count" id="count"></div>
+            <div class="hint">click any tile to launch ↗</div>
         </div>
-        <div class="status" id="status">Draw hose runs across your plot</div>
-    </div>
+        <div id="board"></div>
+    </main>
 
-    <script type="module" src="./app.js"></script>
+    <footer class="wrap">
+        <a class="brand" href="/"><span class="mark"></span><b>Sundry</b></a>
+        <span>No rights reserved.</span>
+    </footer>
+
+    <script type="module" src="./index.js"></script>
 </body>
 
 </html>
