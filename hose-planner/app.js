@@ -165,19 +165,35 @@ function togglePlant(x, y) {
     }
 }
 
-function strokeHitsPath(stroke, path, radius) {
-    return stroke.points.some(sp =>
-        path.some(ep => (sp.x - ep.x) ** 2 + (sp.y - ep.y) ** 2 < radius ** 2)
-    );
+const ERASE_RADIUS = 16;
+
+function eraseRadius() {
+    return ERASE_RADIUS * (W / drawCanvas.offsetWidth);
 }
 
 function commitErase() {
-    const radius = 20 * (W / drawCanvas.offsetWidth);
-    const before = strokes.length;
-    strokes = strokes.filter(s => !strokeHitsPath(s, erasePath, radius));
-    if (strokes.length !== before) { saveState(); updateStatus(); updateButtons(); }
+    const r = eraseRadius();
+    const r2 = r * r;
+    const newStrokes = [];
+    for (const stroke of strokes) {
+        const hit = stroke.points.map(sp =>
+            erasePath.some(ep => (sp.x - ep.x) ** 2 + (sp.y - ep.y) ** 2 < r2)
+        );
+        let seg = [];
+        for (let i = 0; i < stroke.points.length; i++) {
+            if (!hit[i]) {
+                seg.push(stroke.points[i]);
+            } else {
+                if (seg.length > 1) newStrokes.push({ ...stroke, points: seg });
+                seg = [];
+            }
+        }
+        if (seg.length > 1) newStrokes.push({ ...stroke, points: seg });
+    }
+    strokes = newStrokes;
     erasePath = [];
     redrawStrokes();
+    saveState(); updateStatus(); updateButtons();
 }
 
 function pointerDown(e) {
@@ -200,14 +216,14 @@ function pointerMove(e) {
     if (eraseMode) {
         erasePath.push(pos);
         redrawStrokes();
+        const r = eraseRadius();
         dCtx.save();
-        dCtx.strokeStyle = 'rgba(196,58,42,0.5)';
-        dCtx.lineWidth = 16;
-        dCtx.lineCap = 'round';
-        dCtx.lineJoin = 'round';
+        dCtx.strokeStyle = 'rgba(196,58,42,0.7)';
+        dCtx.fillStyle = 'rgba(196,58,42,0.12)';
+        dCtx.lineWidth = 1.5;
         dCtx.beginPath();
-        dCtx.moveTo(erasePath[0].x, erasePath[0].y);
-        erasePath.forEach(p => dCtx.lineTo(p.x, p.y));
+        dCtx.arc(pos.x, pos.y, r, 0, Math.PI * 2);
+        dCtx.fill();
         dCtx.stroke();
         dCtx.restore();
     } else {
