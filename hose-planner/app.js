@@ -12,6 +12,8 @@ const statusEl = document.getElementById('status');
 const COLS = 8, ROWS = 4;
 const GAP = 6;
 let CELL, W, H, OFFSET_X, OFFSET_Y;
+const plants = new Set();
+let startPos = { x: 0, y: 0 };
 
 const CELL_DEFS = [
     ...Array.from({ length: 7 }, (_, c) => Array.from({ length: 3 }, (_, r) => ({ col: c, row: r }))).flat(),
@@ -56,7 +58,9 @@ function drawGrid() {
 
     CELL_DEFS.forEach(({ col, row }) => {
         const { x, y, w, h } = cellRect(col, row);
-        gCtx.fillStyle = bg;
+        const isPlanted = plants.has(`${col},${row}`);
+
+        gCtx.fillStyle = isPlanted ? (isDark ? '#3D5220' : '#C5E3A4') : bg;
         gCtx.beginPath();
         gCtx.roundRect(x, y, w, h, 6);
         gCtx.fill();
@@ -67,7 +71,11 @@ function drawGrid() {
         gCtx.font = `11px sans-serif`;
         gCtx.textAlign = 'center';
         gCtx.textBaseline = 'middle';
-        gCtx.fillText(`${col + 1},${row + 1}`, x + w / 2, y + h / 2);
+        if (isPlanted) {
+            gCtx.fillText("🌱", x + w / 2, y + h / 2);
+        } else {
+            gCtx.fillText(`${col + 1},${row + 1}`, x + w / 2, y + h / 2);
+        }
     });
 }
 
@@ -97,15 +105,32 @@ function getPos(e) {
     const rect = drawCanvas.getBoundingClientRect();
     const scaleX = W / rect.width;
     const scaleY = H / rect.height;
-    const src = e.touches ? e.touches[0] : e;
+    let src = e;
+    if (e.touches && e.touches.length > 0) src = e.touches[0];
+    else if (e.changedTouches && e.changedTouches.length > 0) src = e.changedTouches[0];
+
     return {
         x: (src.clientX - rect.left) * scaleX,
         y: (src.clientY - rect.top) * scaleY
     };
 }
 
+function togglePlant(x, y) {
+    const found = CELL_DEFS.find(({ col, row }) => {
+        const r = cellRect(col, row);
+        return x >= r.x && x <= r.x + r.w && y >= r.y && y <= r.y + r.h;
+    });
+    if (found) {
+        const key = `${found.col},${found.row}`;
+        if (plants.has(key)) plants.delete(key);
+        else plants.add(key);
+        drawGrid();
+    }
+}
+
 drawCanvas.addEventListener('mousedown', e => {
     painting = true;
+    startPos = getPos(e);
     redoStack = [];
     currentStroke = { color, thickness, points: [getPos(e)] };
     updateButtons();
@@ -118,10 +143,15 @@ drawCanvas.addEventListener('mousemove', e => {
     drawStroke(currentStroke);
 });
 
-window.addEventListener('mouseup', () => {
+window.addEventListener('mouseup', (e) => {
     if (!painting) return;
     painting = false;
-    if (currentStroke && currentStroke.points.length > 1) {
+    const endPos = getPos(e);
+    const dist = Math.sqrt((endPos.x - startPos.x) ** 2 + (endPos.y - startPos.y) ** 2);
+
+    if (dist < 6) {
+        togglePlant(endPos.x, endPos.y);
+    } else if (currentStroke && currentStroke.points.length > 1) {
         strokes.push(currentStroke);
         updateStatus();
         updateButtons();
@@ -132,6 +162,7 @@ window.addEventListener('mouseup', () => {
 drawCanvas.addEventListener('touchstart', e => {
     e.preventDefault();
     painting = true;
+    startPos = getPos(e);
     redoStack = [];
     currentStroke = { color, thickness, points: [getPos(e)] };
     updateButtons();
@@ -145,10 +176,15 @@ drawCanvas.addEventListener('touchmove', e => {
     drawStroke(currentStroke);
 }, { passive: false });
 
-window.addEventListener('touchend', () => {
+window.addEventListener('touchend', (e) => {
     if (!painting) return;
     painting = false;
-    if (currentStroke && currentStroke.points.length > 1) {
+    const endPos = getPos(e);
+    const dist = Math.sqrt((endPos.x - startPos.x) ** 2 + (endPos.y - startPos.y) ** 2);
+
+    if (dist < 6) {
+        togglePlant(endPos.x, endPos.y);
+    } else if (currentStroke && currentStroke.points.length > 1) {
         strokes.push(currentStroke);
         updateStatus();
         updateButtons();
