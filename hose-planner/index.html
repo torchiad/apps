@@ -46,6 +46,7 @@
   .canvas-wrap{position:relative;width:100%;line-height:0}
   canvas{display:block;width:100%;touch-action:none}
   #draw-canvas{position:absolute;top:0;left:0;width:100%;cursor:crosshair}
+  #draw-canvas.erasing{cursor:cell}
 
   .status{font-family:'DM Mono',monospace;font-size:12px;padding:10px 14px;border-top:2px solid var(--ink);opacity:.6;background:var(--paper);min-height:38px}
 </style>
@@ -73,6 +74,7 @@
         <span class="thick-out" id="thick-out">8</span>
       </div>
       <div class="toolbar-btns">
+        <button class="tbtn" id="btn-erase">Erase</button>
         <button class="tbtn" id="btn-undo" disabled>&#8617; Undo</button>
         <button class="tbtn" id="btn-redo" disabled>&#8618; Redo</button>
         <button class="tbtn danger" id="btn-clear">Clear</button>

@@ -4,6 +4,7 @@ const gCtx = gridCanvas.getContext('2d');
 const dCtx = drawCanvas.getContext('2d');
 const thickSlider = document.getElementById('thickness');
 const thickOut = document.getElementById('thick-out');
+const btnErase = document.getElementById('btn-erase');
 const btnUndo = document.getElementById('btn-undo');
 const btnRedo = document.getElementById('btn-redo');
 const btnClear = document.getElementById('btn-clear');
@@ -26,6 +27,8 @@ let strokes = [];
 let redoStack = [];
 let painting = false;
 let currentStroke = null;
+let eraseMode = false;
+let erasePath = [];
 
 const STORAGE_KEY = 'hose-planner-v1';
 
@@ -162,71 +165,85 @@ function togglePlant(x, y) {
     }
 }
 
-drawCanvas.addEventListener('mousedown', e => {
-    painting = true;
-    startPos = getPos(e);
-    redoStack = [];
-    currentStroke = { color, thickness, points: [getPos(e)] };
-    updateButtons();
-});
+function strokeHitsPath(stroke, path, radius) {
+    return stroke.points.some(sp =>
+        path.some(ep => (sp.x - ep.x) ** 2 + (sp.y - ep.y) ** 2 < radius ** 2)
+    );
+}
 
-drawCanvas.addEventListener('mousemove', e => {
-    if (!painting) return;
-    currentStroke.points.push(getPos(e));
+function commitErase() {
+    const radius = 20 * (W / drawCanvas.offsetWidth);
+    const before = strokes.length;
+    strokes = strokes.filter(s => !strokeHitsPath(s, erasePath, radius));
+    if (strokes.length !== before) { saveState(); updateStatus(); updateButtons(); }
+    erasePath = [];
     redrawStrokes();
-    drawStroke(currentStroke);
-});
+}
 
-window.addEventListener('mouseup', (e) => {
+function pointerDown(e) {
+    const pos = getPos(e);
+    if (eraseMode) {
+        painting = true;
+        erasePath = [pos];
+    } else {
+        painting = true;
+        startPos = pos;
+        redoStack = [];
+        currentStroke = { color, thickness, points: [pos] };
+        updateButtons();
+    }
+}
+
+function pointerMove(e) {
+    if (!painting) return;
+    const pos = getPos(e);
+    if (eraseMode) {
+        erasePath.push(pos);
+        redrawStrokes();
+        dCtx.save();
+        dCtx.strokeStyle = 'rgba(196,58,42,0.5)';
+        dCtx.lineWidth = 16;
+        dCtx.lineCap = 'round';
+        dCtx.lineJoin = 'round';
+        dCtx.beginPath();
+        dCtx.moveTo(erasePath[0].x, erasePath[0].y);
+        erasePath.forEach(p => dCtx.lineTo(p.x, p.y));
+        dCtx.stroke();
+        dCtx.restore();
+    } else {
+        currentStroke.points.push(pos);
+        redrawStrokes();
+        drawStroke(currentStroke);
+    }
+}
+
+function pointerUp(e) {
     if (!painting) return;
     painting = false;
-    const endPos = getPos(e);
-    const dist = Math.sqrt((endPos.x - startPos.x) ** 2 + (endPos.y - startPos.y) ** 2);
-
-    if (dist < 6) {
-        togglePlant(endPos.x, endPos.y);
-    } else if (currentStroke && currentStroke.points.length > 1) {
-        strokes.push(currentStroke);
-        updateStatus();
-        updateButtons();
-        saveState();
+    if (eraseMode) {
+        commitErase();
+    } else {
+        const endPos = getPos(e);
+        const dist = Math.sqrt((endPos.x - startPos.x) ** 2 + (endPos.y - startPos.y) ** 2);
+        if (dist < 6) {
+            togglePlant(endPos.x, endPos.y);
+        } else if (currentStroke && currentStroke.points.length > 1) {
+            strokes.push(currentStroke);
+            updateStatus();
+            updateButtons();
+            saveState();
+        }
+        currentStroke = null;
     }
-    currentStroke = null;
-});
+}
 
-drawCanvas.addEventListener('touchstart', e => {
-    e.preventDefault();
-    painting = true;
-    startPos = getPos(e);
-    redoStack = [];
-    currentStroke = { color, thickness, points: [getPos(e)] };
-    updateButtons();
-}, { passive: false });
+drawCanvas.addEventListener('mousedown', pointerDown);
+drawCanvas.addEventListener('mousemove', pointerMove);
+window.addEventListener('mouseup', pointerUp);
 
-drawCanvas.addEventListener('touchmove', e => {
-    e.preventDefault();
-    if (!painting) return;
-    currentStroke.points.push(getPos(e));
-    redrawStrokes();
-    drawStroke(currentStroke);
-}, { passive: false });
-
-window.addEventListener('touchend', (e) => {
-    if (!painting) return;
-    painting = false;
-    const endPos = getPos(e);
-    const dist = Math.sqrt((endPos.x - startPos.x) ** 2 + (endPos.y - startPos.y) ** 2);
-
-    if (dist < 6) {
-        togglePlant(endPos.x, endPos.y);
-    } else if (currentStroke && currentStroke.points.length > 1) {
-        strokes.push(currentStroke);
-        updateStatus();
-        updateButtons();
-        saveState();
-    }
-    currentStroke = null;
-});
+drawCanvas.addEventListener('touchstart', e => { e.preventDefault(); pointerDown(e); }, { passive: false });
+drawCanvas.addEventListener('touchmove', e => { e.preventDefault(); pointerMove(e); }, { passive: false });
+window.addEventListener('touchend', e => pointerUp(e));
 
 document.querySelectorAll('.swatch').forEach(s => {
     s.addEventListener('click', () => {
@@ -239,6 +256,14 @@ document.querySelectorAll('.swatch').forEach(s => {
 thickSlider.addEventListener('input', () => {
     thickness = parseInt(thickSlider.value);
     thickOut.textContent = thickness;
+});
+
+btnErase.addEventListener('click', () => {
+    eraseMode = !eraseMode;
+    btnErase.style.background = eraseMode ? '#c43a2a' : '';
+    btnErase.style.color = eraseMode ? '#fff' : '';
+    btnErase.style.borderColor = eraseMode ? '#c43a2a' : '';
+    drawCanvas.classList.toggle('erasing', eraseMode);
 });
 
 btnUndo.addEventListener('click', () => {
