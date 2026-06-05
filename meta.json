@@ -1,0 +1,8 @@
+{
+    "name": "Hose Planner",
+    "category": "Tool",
+    "blurb": "Draw watering routes over your allotment plot grid.",
+    "hue": 145,
+    "pattern": "grid",
+    "date": "2026-06-05"
+}

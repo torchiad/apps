@@ -8,6 +8,7 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const input = {
     index: path.resolve(__dirname, 'index.html'),
     shoreline: path.resolve(__dirname, 'apps/shoreline/index.html'),
+    hose_planner: path.resolve(__dirname, 'apps/hose-planner/index.html'),
 };
 
 export default defineConfig({

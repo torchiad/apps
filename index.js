@@ -108,6 +108,17 @@ const PROJECTS = [
         "category": "Tool",
         "blurb": "Find the perfect beach from any UK city—ranked by distance, vibe, and water quality.",
         "date": "2026-06-03"
+    },
+    {
+        "slug": "hose-planner",
+        "path": "/apps/hose-planner/",
+        "uses": 0,
+        "hue": 145,
+        "pattern": "grid",
+        "name": "Hose Planner",
+        "category": "Tool",
+        "blurb": "Draw watering routes over your allotment plot grid.",
+        "date": "2026-06-05"
     }
 ];
 

@@ -1,0 +1,98 @@
+:root {
+    --color-text-primary: #1a1a1a;
+    --color-text-secondary: #666;
+    --color-border-secondary: #ddd;
+    --border-radius-lg: 12px;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --color-text-primary: #eee;
+        --color-text-secondary: #aaa;
+        --color-border-secondary: #444;
+    }
+}
+
+body {
+    font-family: system-ui, -apple-system, sans-serif;
+    margin: 0;
+    padding: 0 1rem;
+    color: var(--color-text-primary);
+}
+
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
+.wrap {
+    padding: 1.5rem 0;
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.toolbar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+}
+
+.toolbar label {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+}
+
+.swatch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    border: 2px solid transparent;
+    cursor: pointer;
+    display: inline-block;
+}
+
+.swatch.sel {
+    border-color: var(--color-text-primary);
+}
+
+.canvas-wrap {
+    position: relative;
+    width: 100%;
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    border-radius: var(--border-radius-lg);
+    border: 0.5px solid var(--color-border-secondary);
+}
+
+.status {
+    font-size: 13px;
+    color: var(--color-text-secondary);
+    margin-top: 10px;
+    min-height: 18px;
+}
+
+button {
+    padding: 4px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border-secondary);
+    background: transparent;
+    color: inherit;
+    cursor: pointer;
+}
+
+button:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
+}
