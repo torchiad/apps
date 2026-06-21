@@ -26,18 +26,13 @@ a { text-decoration: none; color: inherit; }
 }
 #cover.out { opacity: 0; pointer-events: none; }
 
-#cover-svg {
-  position: absolute; inset: 0;
-  width: 100%; height: 100%;
-}
+#cover-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* Bottom-left cover content: title label + open button */
 .cover-bottom {
   position: relative; z-index: 2;
   display: flex; flex-direction: column; gap: 14px;
   align-items: flex-start;
 }
-
 .cover-label {
   border: 1.5px solid #c8a44e;
   padding: 9px 20px 8px;
@@ -46,29 +41,21 @@ a { text-decoration: none; color: inherit; }
 .cover-script {
   font-family: 'Dancing Script', cursive;
   font-weight: 700; font-size: 40px;
-  color: #c8a44e; line-height: 1;
-  display: block;
+  color: #c8a44e; line-height: 1; display: block;
 }
-
-/* The visible "open" button */
 .cover-open {
   font-family: 'Caveat', cursive;
   font-size: 21px; font-weight: 700;
-  color: #1c3540;
-  background: #c8a44e;
-  border: none;
-  border-radius: 5px;
+  color: #1c3540; background: #c8a44e;
+  border: none; border-radius: 5px;
   padding: 11px 30px;
   box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
-  letter-spacing: 0.3px;
   transition: transform 0.15s, box-shadow 0.15s;
 }
-.cover-open:active {
-  transform: translate(1px,1px);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
-}
+.cover-open:active { transform: translate(1px,1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.3); }
 
 /* ── Notebook shell ──────────────────────────────────── */
+/* Lines at 36 px intervals to match larger recipe font  */
 #app {
   max-width: 720px;
   margin: 0 auto;
@@ -82,28 +69,23 @@ a { text-decoration: none; color: inherit; }
       transparent 57px
     ),
     repeating-linear-gradient(
-      transparent 0px, transparent 29px,
-      rgba(110,130,200,0.17) 29px, rgba(110,130,200,0.17) 30px
+      transparent 0px, transparent 35px,
+      rgba(110,130,200,0.17) 35px, rgba(110,130,200,0.17) 36px
     );
 }
 
 /* Desktop: two-column category grid */
 @media (min-width: 600px) {
   .cat-list { padding: 8px 16px 60px; }
-  .cat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  .cat-row { border: 1px solid rgba(110,130,200,0.14); border-radius: 0; }
+  .cat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+  .cat-row  { border: 1px solid rgba(110,130,200,0.14); border-radius: 0; }
 }
 
 /* ── Header ──────────────────────────────────────────── */
 .hdr {
   position: sticky; top: 0; z-index: 50;
   display: flex; align-items: center; gap: 10px;
-  padding: 10px 14px;
-  min-height: 54px;
+  padding: 10px 14px; min-height: 54px;
   background: rgba(247,243,229,0.96);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid rgba(110,130,200,0.17);
@@ -119,7 +101,6 @@ a { text-decoration: none; color: inherit; }
   color: #2a1e14; flex: 1; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-/* "Uredi" on recipe page / "+" on category page */
 .hdr-action {
   font-size: 17px; color: rgba(42,30,20,0.45);
   padding: 4px 8px; flex: none; display: none;
@@ -133,50 +114,36 @@ a { text-decoration: none; color: inherit; }
 }
 .home-hero-title {
   font-family: 'Dancing Script', cursive;
-  font-size: clamp(48px, 12vw, 72px);
-  font-weight: 700;
-  color: #2a1e14;
-  line-height: 1;
-  margin-bottom: 10px;
+  font-size: clamp(48px, 12vw, 72px); font-weight: 700;
+  color: #2a1e14; line-height: 1; margin-bottom: 10px;
 }
 .home-hero-sub {
-  font-size: 20px;
-  color: rgba(42,30,20,0.45);
-  margin-bottom: 28px;
+  font-size: 22px; color: rgba(42,30,20,0.45); margin-bottom: 28px;
 }
 .home-hero-btn {
   display: inline-block;
   font-family: 'Caveat', cursive;
-  font-size: 22px; font-weight: 700;
-  color: white;
-  background: #c94040;
-  border: 2px solid rgba(0,0,0,0.1);
-  border-radius: 8px;
+  font-size: 24px; font-weight: 700;
+  color: white; background: #c94040;
+  border: 2px solid rgba(0,0,0,0.1); border-radius: 8px;
   padding: 12px 36px;
   box-shadow: 4px 4px 0 rgba(0,0,0,0.15);
   cursor: pointer;
   transition: transform 0.1s, box-shadow 0.1s;
 }
-.home-hero-btn:active {
-  transform: translate(2px,2px);
-  box-shadow: 2px 2px 0 rgba(0,0,0,0.15);
-}
+.home-hero-btn:active { transform: translate(2px,2px); box-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
 
 .home-cat-head {
   padding: 18px 16px 6px 72px;
   font-size: 16px; color: rgba(42,30,20,0.38);
-  letter-spacing: 1px; text-transform: uppercase;
-  font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase; font-weight: 700;
 }
-
 .cat-list { padding: 4px 0 60px; }
-
 .cat-row {
   display: flex; align-items: center; gap: 12px;
   padding: 13px 16px 13px 72px;
   border-bottom: 1px solid rgba(110,130,200,0.14);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: background 0.1s;
 }
 .cat-row:active { background: rgba(201,64,64,0.06); }
@@ -189,38 +156,32 @@ a { text-decoration: none; color: inherit; }
 
 /* ── Recipe list ─────────────────────────────────────── */
 .recipe-list { padding: 0 0 60px; }
-
 .recipe-row {
   display: flex; align-items: center; gap: 10px;
   padding: 14px 16px 14px 72px;
   border-bottom: 1px solid rgba(110,130,200,0.14);
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
+  cursor: pointer; -webkit-tap-highlight-color: transparent;
   transition: background 0.1s;
 }
 .recipe-row:active { background: rgba(201,64,64,0.06); }
-.rr-body   { flex: 1; min-width: 0; }
-.rr-hr     { font-size: 22px; font-weight: 600; color: #2a1e14; line-height: 1.15; }
-.rr-en     { font-size: 16px; color: rgba(42,30,20,0.42); }
-.rr-arrow  { font-size: 20px; color: #c94040; flex: none; }
-
+.rr-body  { flex: 1; min-width: 0; }
+.rr-hr    { font-size: 22px; font-weight: 600; color: #2a1e14; line-height: 1.15; }
+.rr-en    { font-size: 16px; color: rgba(42,30,20,0.42); }
+.rr-arrow { font-size: 20px; color: #c94040; flex: none; }
 .list-empty {
   padding: 50px 16px 20px 72px;
-  font-size: 20px; color: rgba(42,30,20,0.38); line-height: 1.7;
+  font-size: 22px; color: rgba(42,30,20,0.38); line-height: 1.7;
 }
 
 /* ── Recipe view ─────────────────────────────────────── */
-/* padding-top: 6px puts first text at 54+6=60px = 2×30px grid line */
-.recipe-view { padding: 6px 20px 60px 72px; }
+/* padding-top 18px: header 54px + 18px = 72px = 2×36 grid */
+.recipe-view { padding: 18px 16px 60px; }
 
 /* Croatian title: double-rectangle box */
-.title-hr {
-  display: inline-block; position: relative;
-  margin-bottom: 6px;
-}
+.title-hr { display: inline-block; position: relative; margin-bottom: 6px; }
 .title-hr-inner {
   display: inline-block;
-  font-size: 22px; font-weight: 700;
+  font-size: 24px; font-weight: 700;
   color: #c94040; text-transform: uppercase; letter-spacing: 0.5px;
   line-height: 1.25;
   border: 2px solid #c94040;
@@ -228,70 +189,69 @@ a { text-decoration: none; color: inherit; }
 }
 .title-hr::after {
   content: '';
-  position: absolute;
-  inset: 4px -5px -5px 4px;
+  position: absolute; inset: 4px -5px -5px 4px;
   border: 1.5px solid rgba(201,64,64,0.32);
   pointer-events: none;
 }
 
-/* English title: scroll / ruffle banner */
-.title-en {
-  display: flex; align-items: stretch;
-  margin-top: 10px; margin-bottom: 30px;
-}
-/* Rolled-paper end caps — pure CSS, no SVG */
+/* English title: ruffle / scroll banner */
+.title-en { display: flex; align-items: stretch; margin-top: 10px; margin-bottom: 18px; }
 .ruffle-cap {
-  width: 18px; flex: none;
-  background: #f0ebd8;
-  border: 2px solid #c94040;
-  border-right: none;
-  border-radius: 4px 0 0 4px;
-  position: relative;
+  width: 18px; flex: none; background: #f0ebd8;
+  border: 2px solid #c94040; border-right: none;
+  border-radius: 4px 0 0 4px; position: relative;
 }
-.ruffle-cap-r {
-  border-right: 2px solid #c94040;
-  border-left: none;
-  border-radius: 0 4px 4px 0;
-}
-/* Centre crease on each cap */
+.ruffle-cap-r { border-right: 2px solid #c94040; border-left: none; border-radius: 0 4px 4px 0; }
 .ruffle-cap::after {
-  content: '';
-  position: absolute;
+  content: ''; position: absolute;
   top: 18%; bottom: 18%; left: 50%;
-  width: 1px;
-  background: rgba(201,64,64,0.28);
+  width: 1px; background: rgba(201,64,64,0.28);
 }
 .ruffle-text {
   flex: 1;
-  border-top: 2px solid #c94040;
-  border-bottom: 2px solid #c94040;
+  border-top: 2px solid #c94040; border-bottom: 2px solid #c94040;
   padding: 5px 10px;
-  font-size: 17px; font-weight: 600;
+  font-size: 18px; font-weight: 600;
   color: #c94040; text-transform: uppercase;
   letter-spacing: 0.5px; text-align: center; line-height: 1.3;
 }
 
-/* Section headings — handwritten underline style */
-.recipe-lbl {
-  font-size: 20px; font-weight: 700;
-  color: #c94040;
-  margin: 30px 0 0;
-  display: inline-block;
-  border-bottom: 1.5px solid rgba(201,64,64,0.4);
-  padding-bottom: 1px;
-  line-height: 30px;
+/* Split layout: HR left, EN right */
+.recipe-split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 16px;
+  border-top: 1px solid rgba(110,130,200,0.17);
+  padding-top: 0;
+}
+.recipe-col { min-width: 0; }
+
+/* Column language header */
+.recipe-col-lang {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(201,64,64,0.5);
+  padding: 8px 0 0;
+  display: block;
 }
 
-/* Recipe body — line-height matches the 30 px ruled lines */
+/* Section headings — handwritten underline style */
+.recipe-lbl {
+  font-size: 22px; font-weight: 700; color: #c94040;
+  margin: 24px 0 0; display: inline-block;
+  border-bottom: 1.5px solid rgba(201,64,64,0.4);
+  padding-bottom: 1px; line-height: 36px;
+}
+
+/* Body text — 36 px line-height matches the ruled grid */
 .recipe-body {
-  font-size: 20px; line-height: 30px;
+  font-size: 22px; line-height: 36px;
   color: #2a1e14; white-space: pre-wrap;
   display: block; margin-top: 0;
 }
 
 /* ── Add / Edit form ─────────────────────────────────── */
 .form-page { padding: 8px 0 60px; }
-
 .form-lbl {
   display: block;
   font-size: 11px; font-weight: 700;
@@ -301,36 +261,29 @@ a { text-decoration: none; color: inherit; }
 }
 .form-field {
   width: 100%; background: transparent;
-  border: none;
-  border-bottom: 1px solid rgba(201,64,64,0.22);
+  border: none; border-bottom: 1px solid rgba(201,64,64,0.22);
   padding: 6px 16px 8px 72px;
   font-size: 22px; color: #2a1e14;
   outline: none; resize: none; display: block;
 }
 .form-field:focus { border-bottom-color: #c94040; }
 .form-field::placeholder { color: rgba(42,30,20,0.26); }
-
 .form-actions { padding: 28px 16px 0; }
-
 .btn-save {
   display: block; width: 100%;
   background: #c94040; color: white;
   font-size: 22px; font-weight: 700;
-  border: 2px solid rgba(0,0,0,0.1);
-  border-radius: 8px; padding: 14px;
-  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
-  text-align: center;
+  border: 2px solid rgba(0,0,0,0.1); border-radius: 8px;
+  padding: 14px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15); text-align: center;
   transition: transform 0.1s, box-shadow 0.1s;
 }
 .btn-save:active { transform: translate(1px,1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
-
 .btn-delete {
-  display: block; width: 100%;
-  margin-top: 12px;
+  display: block; width: 100%; margin-top: 12px;
   font-size: 18px; color: rgba(42,30,20,0.38);
-  border: 1.5px solid rgba(42,30,20,0.16);
-  border-radius: 8px; padding: 11px;
-  text-align: center;
+  border: 1.5px solid rgba(42,30,20,0.16); border-radius: 8px;
+  padding: 11px; text-align: center;
 }
 
 </style>
@@ -340,7 +293,6 @@ a { text-decoration: none; color: inherit; }
 <!-- ── Cover ──────────────────────────────────────────── -->
 <div id="cover">
 
-  <!-- Marble SVG — replicates the teal notebook cover -->
   <svg id="cover-svg" viewBox="0 0 390 844"
        xmlns="http://www.w3.org/2000/svg"
        preserveAspectRatio="xMidYMid slice">
@@ -358,42 +310,27 @@ a { text-decoration: none; color: inherit; }
       </radialGradient>
       <filter id="marble" x="-10%" y="-10%" width="120%" height="120%">
         <feTurbulence type="turbulence"
-          baseFrequency="0.013 0.007"
-          numOctaves="4" seed="9" result="n"/>
+          baseFrequency="0.013 0.007" numOctaves="4" seed="9" result="n"/>
         <feDisplacementMap in="SourceGraphic" in2="n"
           scale="65" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
     </defs>
-
     <rect width="390" height="844" fill="url(#g-base)"/>
-
     <g filter="url(#marble)">
-      <line x1="-70" y1="740" x2="490" y2="475"
-            stroke="white" stroke-width="48" stroke-linecap="round" opacity="0.90"/>
-      <line x1="-70" y1="695" x2="490" y2="430"
-            stroke="white" stroke-width="22" stroke-linecap="round" opacity="0.75"/>
-      <line x1="-70" y1="658" x2="490" y2="393"
-            stroke="white" stroke-width="11" stroke-linecap="round" opacity="0.82"/>
-      <line x1="-70" y1="628" x2="490" y2="363"
-            stroke="white" stroke-width="5"  stroke-linecap="round" opacity="0.60"/>
-      <line x1="-70" y1="762" x2="490" y2="497"
-            stroke="#c89855" stroke-width="13" stroke-linecap="round" opacity="0.58"/>
-      <line x1="-70" y1="749" x2="490" y2="484"
-            stroke="#e8cc88" stroke-width="5"  stroke-linecap="round" opacity="0.42"/>
-      <line x1="270" y1="860" x2="316" y2="-20"
-            stroke="#0c1e2e" stroke-width="7" stroke-linecap="round" opacity="0.48"/>
-      <line x1="280" y1="860" x2="326" y2="-20"
-            stroke="#0c1e2e" stroke-width="3" stroke-linecap="round" opacity="0.28"/>
+      <line x1="-70" y1="740" x2="490" y2="475" stroke="white" stroke-width="48" stroke-linecap="round" opacity="0.90"/>
+      <line x1="-70" y1="695" x2="490" y2="430" stroke="white" stroke-width="22" stroke-linecap="round" opacity="0.75"/>
+      <line x1="-70" y1="658" x2="490" y2="393" stroke="white" stroke-width="11" stroke-linecap="round" opacity="0.82"/>
+      <line x1="-70" y1="628" x2="490" y2="363" stroke="white" stroke-width="5"  stroke-linecap="round" opacity="0.60"/>
+      <line x1="-70" y1="762" x2="490" y2="497" stroke="#c89855" stroke-width="13" stroke-linecap="round" opacity="0.58"/>
+      <line x1="-70" y1="749" x2="490" y2="484" stroke="#e8cc88" stroke-width="5"  stroke-linecap="round" opacity="0.42"/>
+      <line x1="270" y1="860" x2="316" y2="-20" stroke="#0c1e2e" stroke-width="7" stroke-linecap="round" opacity="0.48"/>
+      <line x1="280" y1="860" x2="326" y2="-20" stroke="#0c1e2e" stroke-width="3" stroke-linecap="round" opacity="0.28"/>
     </g>
-
     <rect width="390" height="844" fill="url(#g-highlight)"/>
   </svg>
 
-  <!-- Bottom-left: gold label + visible open button -->
   <div class="cover-bottom">
-    <div class="cover-label">
-      <span class="cover-script">Kuharica</span>
-    </div>
+    <div class="cover-label"><span class="cover-script">Kuharica</span></div>
     <button class="cover-open" id="cover-open-btn">Otvori kuharicu →</button>
   </div>
 
@@ -427,38 +364,71 @@ const CATS = [
   { id: 'ostalo',   hr: 'Ostalo',          en: 'Other',          icon: '📌' },
 ];
 
-/* ── Default recipes (from the notebook) ─────────────── */
+/* ── Default recipes (bilingual) ─────────────────────── */
 const DEFAULTS = [
   {
     id: 'fritterice',
-    nameHr: 'Friterke od Tikvica',
-    nameEn: 'Courgette Fritters',
-    cat: 'predjela',
-    ingredients: '- 120g courgette\n- 1/2 tsp salt',
-    method: 'Grate the courgette (do not peel it).\nAdd the salt and let it sit for a few min. Drain the water.\n\nAdd following:\n- 1 large egg\n- 1/2 tsp baking powder\n- 3 tbsp plain flour\n- cca 35g grated parmesan cheese\n\nShallow fry them by using tablespoon as a measurement.',
+    nameHr: 'Friterke od Tikvica', nameEn: 'Courgette Fritters', cat: 'predjela',
+    ingredientsHr: '- 120g tikvice\n- 1/2 žličice soli',
+    ingredientsEn: '- 120g courgette\n- 1/2 tsp salt',
+    methodHr: 'Naribajte tikvice (nemojte ih guliti).\nDodajte sol i ostavite nekoliko minuta. Ocijedite vodu.\n\nDodajte sljedeće:\n- 1 veliko jaje\n- 1/2 žličice praška za pecivo\n- 3 žlice glatkog brašna\n- cca 35g ribanog parmezana\n\nPržite na plitkom ulju koristeći žlicu za mjerenje.',
+    methodEn: 'Grate the courgette (do not peel it).\nAdd the salt and let it sit for a few min. Drain the water.\n\nAdd following:\n- 1 large egg\n- 1/2 tsp baking powder\n- 3 tbsp plain flour\n- cca 35g grated parmesan cheese\n\nShallow fry them by using tablespoon as a measurement.',
   },
   {
     id: 'jufka',
-    nameHr: 'Jufka',
-    nameEn: 'Filo Pastry',
-    cat: 'kruh',
-    ingredients: '- 500g bread flour\n- salt\n- 1 tbsp sunflower oil\n- 350ml lukewarm water',
-    method: 'Form into ball, place in oily container, oil it on top and cover.\nLeave in fridge 1–2:30 hours. Best if left overnight.\n\nOnce you want to use it, take out of the fridge 10–15 min before stretching.\n\nAll pies are baked in oven at 250°c around 20 min.',
+    nameHr: 'Jufka', nameEn: 'Filo Pastry', cat: 'kruh',
+    ingredientsHr: '- 500g brašna za kruh\n- sol\n- 1 žlica suncokretovog ulja\n- 350ml mlake vode',
+    ingredientsEn: '- 500g bread flour\n- salt\n- 1 tbsp sunflower oil\n- 350ml lukewarm water',
+    methodHr: 'Formirajte kuglu, stavite u nauljenu posudu, prelijte uljem i pokrijte.\nOstavite u hladnjaku 1–2:30 sati. Najbolje je ostaviti preko noći.\n\nKad ga koristite, izvadite iz hladnjaka 10–15 min prije razvlačenja.\n\nSve pite se peku u pećnici na 250°c oko 20 minuta.',
+    methodEn: 'Form into ball, place in oily container, oil it on top and cover.\nLeave in fridge 1–2:30 hours. Best if left overnight.\n\nOnce you want to use it, take out of the fridge 10–15 min before stretching.\n\nAll pies are baked in oven at 250°c around 20 min.',
+  },
+  {
+    id: 'burek',
+    nameHr: 'Burek', nameEn: 'Meat Pie', cat: 'glavna',
+    ingredientsHr: '- 1/2 kg mljevenog goveđeg mesa\n- 1 veliki luk, sitno nasjeckan\n- 2 žličice soli\n- 1 žličica papra\n- 1 šotica vode',
+    ingredientsEn: '- 1/2 kg mince beef\n- 1 large onion, diced fine\n- 2 tsp salt\n- 1 tsp pepper\n- 1 shot glass water',
+    methodHr: 'Sve pomiješajte i koristite s jufkom (tijestom za pitu).',
+    methodEn: 'Mix all and use with filo pastry.',
+  },
+  {
+    id: 'peksimeti',
+    nameHr: 'Peksimeti', nameEn: 'Peksimeti', cat: 'kruh',
+    ingredientsHr: '- 2 srednja jaja\n- 250g grčkog jogurta\n- 1 žličica soli\n- 1 žličica (12g) praška za pecivo\n- 2–3 šalice glatkog brašna',
+    ingredientsEn: '- 2 medium eggs\n- 250g greek yoghurt\n- 1 tsp salt\n- 1 tsp (12g) baking powder\n- 2–3 cups plain flour',
+    methodHr: 'Sve pomiješajte i pržite na ulju.',
+    methodEn: 'Mix all and fry in oil.',
+  },
+  {
+    id: 'lepinja',
+    nameHr: 'Lepinja', nameEn: 'Balkan Flatbread', cat: 'kruh',
+    ingredientsHr: '- 180ml mlake vode + 2¼ žličice suhog kvasca (pomiješajte i ostavite)\n- 180ml mlakog mlijeka\n- 2 žlice suncokretovog ulja\n- 500g brašna za kruh\n- 1 žličica šećera\n- 1 žličica soli',
+    ingredientsEn: '- 180ml lukewarm water + 2¼ tsp dry yeast (mix & leave to activate)\n- 180ml lukewarm milk\n- 2 tbsp sunflower oil\n- 500g bread flour\n- 1 tsp sugar\n- 1 tsp salt',
+    methodHr: 'Pomiješajte mokre sastojke, zatim dodajte suhe.\nDobijete 4 lepinje (ili 6 malih).\n\nOstavite dizano tijesto da se odmori 10–15 min.\nOblikujte rukom, zarezite linije hrptom noža.\n\nPecite 8–12 min na 250°c dok ne bude zlatno.\nOdmah poprskajte vodom i zamotajte u ručnik 10–15 min za meku teksturu.',
+    methodEn: 'Mix wet ingredients first, then add dry.\nMakes 4 flatbreads (or 6 small).\n\nRest risen dough for 10–15 min.\nShape by hand, press lines with the back of a knife.\n\nBake 8–12 min at 250°c until golden.\nImmediately sprinkle with water and wrap in a towel for 10–15 min for soft texture.',
   },
 ];
 
 /* ── localStorage helpers ────────────────────────────── */
-function db() {
-  try { return JSON.parse(localStorage.getItem('kuharica.v1') || '[]'); }
-  catch { return []; }
-}
-function dbSave(rows) {
-  localStorage.setItem('kuharica.v1', JSON.stringify(rows));
+function migrateRecipe(r) {
+  if ('ingredientsEn' in r) return r;
+  const { ingredients, method, ...rest } = r;
+  return { ...rest, ingredientsHr: '', ingredientsEn: ingredients || '', methodHr: '', methodEn: method || '' };
 }
 
-/* Seed default recipes on first load */
+function db() {
+  try {
+    const rows = JSON.parse(localStorage.getItem('kuharica.v1') || '[]');
+    return rows.map(migrateRecipe);
+  } catch { return []; }
+}
+
+function dbSave(rows) { localStorage.setItem('kuharica.v1', JSON.stringify(rows)); }
+
 function seedDefaults() {
-  if (db().length === 0) dbSave(DEFAULTS);
+  const existing = db();
+  const ids      = new Set(existing.map(r => r.id));
+  const toAdd    = DEFAULTS.filter(r => !ids.has(r.id));
+  if (toAdd.length) dbSave([...existing, ...toAdd]);
 }
 
 /* ── Navigation state ────────────────────────────────── */
@@ -474,13 +444,11 @@ function nav(p, c, r) {
   window.scrollTo(0, 0);
 }
 
-/* ── Ruffle banner caps (pure CSS divs, no SVG) ──────── */
-function ruffleLeft()  { return `<div class="ruffle-cap"></div>`; }
-function ruffleRight() { return `<div class="ruffle-cap ruffle-cap-r"></div>`; }
-
 /* ── HTML helpers ────────────────────────────────────── */
 function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 function attr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+function ruffleLeft()  { return `<div class="ruffle-cap"></div>`; }
+function ruffleRight() { return `<div class="ruffle-cap ruffle-cap-r"></div>`; }
 
 /* ── Page: Home ──────────────────────────────────────── */
 function pageHome() {
@@ -534,7 +502,7 @@ function pageCategory() {
   </div>`;
 }
 
-/* ── Page: Recipe view ───────────────────────────────── */
+/* ── Page: Recipe view (HR left, EN right) ───────────── */
 function pageRecipe() {
   const r = db().find(x => x.id === recipeId);
   if (!r) return `<p class="list-empty">Recept nije pronađen.</p>`;
@@ -546,6 +514,9 @@ function pageRecipe() {
       ${ruffleRight()}
     </div>` : '';
 
+  const hasIng = r.ingredientsHr || r.ingredientsEn;
+  const hasMth = r.methodHr || r.methodEn;
+
   return `<div class="recipe-view">
 
     <div class="title-hr">
@@ -554,15 +525,32 @@ function pageRecipe() {
 
     ${enBanner}
 
-    ${r.ingredients ? `
-      <p class="recipe-lbl">Sastojci · Ingredients</p>
-      <p class="recipe-body">${esc(r.ingredients)}</p>
-    ` : ''}
+    <div class="recipe-split">
+      <span class="recipe-col-lang">Hrvatski</span>
+      <span class="recipe-col-lang">English</span>
 
-    ${r.method ? `
-      <p class="recipe-lbl">Priprema · Method</p>
-      <p class="recipe-body">${esc(r.method)}</p>
-    ` : ''}
+      ${hasIng ? `
+        <div class="recipe-col">
+          <p class="recipe-lbl">Sastojci</p>
+          <p class="recipe-body">${esc(r.ingredientsHr || '')}</p>
+        </div>
+        <div class="recipe-col">
+          <p class="recipe-lbl">Ingredients</p>
+          <p class="recipe-body">${esc(r.ingredientsEn || '')}</p>
+        </div>
+      ` : ''}
+
+      ${hasMth ? `
+        <div class="recipe-col">
+          <p class="recipe-lbl">Priprema</p>
+          <p class="recipe-body">${esc(r.methodHr || '')}</p>
+        </div>
+        <div class="recipe-col">
+          <p class="recipe-lbl">Method</p>
+          <p class="recipe-body">${esc(r.methodEn || '')}</p>
+        </div>
+      ` : ''}
+    </div>
 
   </div>`;
 }
@@ -589,13 +577,21 @@ function pageForm(editId) {
     <label class="form-lbl">Kategorija / Category</label>
     <select class="form-field" id="f-cat">${opts}</select>
 
-    <label class="form-lbl">Sastojci · Ingredients</label>
-    <textarea class="form-field" id="f-ing" rows="6"
-              placeholder="- 500g brašno&#10;- 1 žlica soli…">${esc(r?.ingredients || '')}</textarea>
+    <label class="form-lbl">Sastojci (HR)</label>
+    <textarea class="form-field" id="f-ing-hr" rows="5"
+              placeholder="- 500g brašno&#10;- 1 žlica soli…">${esc(r?.ingredientsHr || '')}</textarea>
 
-    <label class="form-lbl">Priprema · Method</label>
-    <textarea class="form-field" id="f-mth" rows="8"
-              placeholder="Pomiješaj sastojke…">${esc(r?.method || '')}</textarea>
+    <label class="form-lbl">Ingredients (EN)</label>
+    <textarea class="form-field" id="f-ing-en" rows="5"
+              placeholder="- 500g flour&#10;- 1 tbsp salt…">${esc(r?.ingredientsEn || '')}</textarea>
+
+    <label class="form-lbl">Priprema (HR)</label>
+    <textarea class="form-field" id="f-mth-hr" rows="7"
+              placeholder="Pomiješaj sastojke…">${esc(r?.methodHr || '')}</textarea>
+
+    <label class="form-lbl">Method (EN)</label>
+    <textarea class="form-field" id="f-mth-en" rows="7"
+              placeholder="Mix ingredients…">${esc(r?.methodEn || '')}</textarea>
 
     <div class="form-actions">
       <button class="btn-save"
@@ -617,12 +613,14 @@ function saveRecipe(editId) {
 
   const rows = db();
   const payload = {
-    id:          editId || Math.random().toString(36).slice(2),
+    id:            editId || Math.random().toString(36).slice(2),
     nameHr,
-    nameEn:      document.getElementById('f-en').value.trim(),
-    cat:         document.getElementById('f-cat').value,
-    ingredients: document.getElementById('f-ing').value.trim(),
-    method:      document.getElementById('f-mth').value.trim(),
+    nameEn:        document.getElementById('f-en').value.trim(),
+    cat:           document.getElementById('f-cat').value,
+    ingredientsHr: document.getElementById('f-ing-hr').value.trim(),
+    ingredientsEn: document.getElementById('f-ing-en').value.trim(),
+    methodHr:      document.getElementById('f-mth-hr').value.trim(),
+    methodEn:      document.getElementById('f-mth-en').value.trim(),
   };
 
   if (editId) {
@@ -639,7 +637,7 @@ function saveRecipe(editId) {
 function deleteRecipe(id) {
   if (!confirm('Obrisati recept?')) return;
   dbSave(db().filter(r => r.id !== id));
-  nav('category', catId);
+  nav('home');
 }
 
 /* ── Render ──────────────────────────────────────────── */
@@ -649,7 +647,7 @@ function render() {
   const titleEl   = document.getElementById('hdr-title');
   const actionBtn = document.getElementById('hdr-action');
 
-  backBtn.style.display  = page === 'home' ? 'none' : '';
+  backBtn.style.display   = page === 'home' ? 'none' : '';
   actionBtn.style.display = 'none';
   actionBtn.onclick = null;
 
@@ -663,9 +661,8 @@ function render() {
     case 'category': {
       const cat = CATS.find(c => c.id === catId);
       titleEl.textContent = cat ? cat.hr : '';
-      /* "+" in header to add a recipe to this category */
-      actionBtn.textContent  = '+';
-      actionBtn.style.display = '';
+      actionBtn.textContent    = '+';
+      actionBtn.style.display  = '';
       actionBtn.style.fontSize = '26px';
       actionBtn.onclick = () => nav('add');
       main.innerHTML = pageCategory();
@@ -674,9 +671,9 @@ function render() {
 
     case 'recipe': {
       const r = db().find(x => x.id === recipeId);
-      titleEl.textContent    = r ? r.nameHr : 'Recept';
-      actionBtn.textContent  = 'Uredi';
-      actionBtn.style.display = '';
+      titleEl.textContent      = r ? r.nameHr : 'Recept';
+      actionBtn.textContent    = 'Uredi';
+      actionBtn.style.display  = '';
       actionBtn.style.fontSize = '17px';
       actionBtn.onclick = () => nav('edit', catId, recipeId);
       main.innerHTML = pageRecipe();
