@@ -175,7 +175,7 @@ a { text-decoration: none; color: inherit; }
 
 /* ── Recipe view ─────────────────────────────────────── */
 /* padding-top 18px: header 54px + 18px = 72px = 2×36 grid */
-.recipe-view { padding: 18px 16px 60px; }
+.recipe-view { padding: 18px 20px 60px 72px; }
 
 /* Croatian title: double-rectangle box */
 .title-hr { display: inline-block; position: relative; margin-bottom: 6px; }
@@ -216,24 +216,23 @@ a { text-decoration: none; color: inherit; }
   letter-spacing: 0.5px; text-align: center; line-height: 1.3;
 }
 
-/* Split layout: HR left, EN right */
-.recipe-split {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 0 16px;
-  border-top: 1px solid rgba(110,130,200,0.17);
-  padding-top: 0;
+/* Language toggle */
+.lang-toggle {
+  display: flex; gap: 0; justify-content: flex-end;
+  margin-bottom: 20px;
+  border-bottom: 1px solid rgba(110,130,200,0.17);
+  padding-bottom: 10px;
 }
-.recipe-col { min-width: 0; }
-
-/* Column language header */
-.recipe-col-lang {
-  font-size: 11px; font-weight: 700;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: rgba(201,64,64,0.5);
-  padding: 8px 0 0;
-  display: block;
+.lang-btn {
+  font-family: 'Caveat', cursive;
+  font-size: 18px; font-weight: 700;
+  padding: 4px 16px;
+  border: 1.5px solid #c94040;
+  color: #c94040; background: transparent; line-height: 1.4;
 }
+.lang-btn:first-child { border-radius: 4px 0 0 4px; border-right: none; }
+.lang-btn:last-child  { border-radius: 0 4px 4px 0; }
+.lang-btn.active { background: #c94040; color: white; }
 
 /* Section headings — handwritten underline style */
 .recipe-lbl {
@@ -435,6 +434,13 @@ function seedDefaults() {
 let page     = 'home';
 let catId    = null;
 let recipeId = null;
+let lang     = localStorage.getItem('kuharica.lang') || 'hr';
+
+function setLang(l) {
+  lang = l;
+  localStorage.setItem('kuharica.lang', l);
+  document.getElementById('main').innerHTML = pageRecipe();
+}
 
 function nav(p, c, r) {
   page = p;
@@ -502,10 +508,16 @@ function pageCategory() {
   </div>`;
 }
 
-/* ── Page: Recipe view (HR left, EN right) ───────────── */
+/* ── Page: Recipe view (single language with toggle) ─── */
 function pageRecipe() {
   const r = db().find(x => x.id === recipeId);
   if (!r) return `<p class="list-empty">Recept nije pronađen.</p>`;
+
+  const isHr       = lang === 'hr';
+  const ingredients = isHr ? r.ingredientsHr : r.ingredientsEn;
+  const method      = isHr ? r.methodHr      : r.methodEn;
+  const lblIng      = isHr ? 'Sastojci'      : 'Ingredients';
+  const lblMth      = isHr ? 'Priprema'      : 'Method';
 
   const enBanner = r.nameEn ? `
     <div class="title-en">
@@ -514,10 +526,12 @@ function pageRecipe() {
       ${ruffleRight()}
     </div>` : '';
 
-  const hasIng = r.ingredientsHr || r.ingredientsEn;
-  const hasMth = r.methodHr || r.methodEn;
-
   return `<div class="recipe-view">
+
+    <div class="lang-toggle">
+      <button class="lang-btn ${isHr ? 'active' : ''}" onclick="setLang('hr')">HR</button>
+      <button class="lang-btn ${!isHr ? 'active' : ''}" onclick="setLang('en')">EN</button>
+    </div>
 
     <div class="title-hr">
       <div class="title-hr-inner">${esc(r.nameHr.toUpperCase())}</div>
@@ -525,32 +539,15 @@ function pageRecipe() {
 
     ${enBanner}
 
-    <div class="recipe-split">
-      <span class="recipe-col-lang">Hrvatski</span>
-      <span class="recipe-col-lang">English</span>
+    ${ingredients ? `
+      <p class="recipe-lbl">${lblIng}</p>
+      <p class="recipe-body">${esc(ingredients)}</p>
+    ` : ''}
 
-      ${hasIng ? `
-        <div class="recipe-col">
-          <p class="recipe-lbl">Sastojci</p>
-          <p class="recipe-body">${esc(r.ingredientsHr || '')}</p>
-        </div>
-        <div class="recipe-col">
-          <p class="recipe-lbl">Ingredients</p>
-          <p class="recipe-body">${esc(r.ingredientsEn || '')}</p>
-        </div>
-      ` : ''}
-
-      ${hasMth ? `
-        <div class="recipe-col">
-          <p class="recipe-lbl">Priprema</p>
-          <p class="recipe-body">${esc(r.methodHr || '')}</p>
-        </div>
-        <div class="recipe-col">
-          <p class="recipe-lbl">Method</p>
-          <p class="recipe-body">${esc(r.methodEn || '')}</p>
-        </div>
-      ` : ''}
-    </div>
+    ${method ? `
+      <p class="recipe-lbl">${lblMth}</p>
+      <p class="recipe-body">${esc(method)}</p>
+    ` : ''}
 
   </div>`;
 }
