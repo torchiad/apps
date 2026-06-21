@@ -21,8 +21,7 @@ a { text-decoration: none; color: inherit; }
 #cover {
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: flex-end; justify-content: flex-start;
-  padding: 44px 34px;
-  cursor: pointer;
+  padding: 44px 34px 50px;
   transition: opacity 0.7s ease;
 }
 #cover.out { opacity: 0; pointer-events: none; }
@@ -32,8 +31,14 @@ a { text-decoration: none; color: inherit; }
   width: 100%; height: 100%;
 }
 
-.cover-label {
+/* Bottom-left cover content: title label + open button */
+.cover-bottom {
   position: relative; z-index: 2;
+  display: flex; flex-direction: column; gap: 14px;
+  align-items: flex-start;
+}
+
+.cover-label {
   border: 1.5px solid #c8a44e;
   padding: 9px 20px 8px;
   display: inline-block;
@@ -45,10 +50,22 @@ a { text-decoration: none; color: inherit; }
   display: block;
 }
 
-.cover-hint {
-  position: absolute; z-index: 2;
-  bottom: 20px; right: 24px;
-  font-size: 14px; color: rgba(255,255,255,0.5);
+/* The visible "open" button */
+.cover-open {
+  font-family: 'Caveat', cursive;
+  font-size: 21px; font-weight: 700;
+  color: #1c3540;
+  background: #c8a44e;
+  border: none;
+  border-radius: 5px;
+  padding: 11px 30px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.3);
+  letter-spacing: 0.3px;
+  transition: transform 0.15s, box-shadow 0.15s;
+}
+.cover-open:active {
+  transform: translate(1px,1px);
+  box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
 }
 
 /* ── Notebook shell ──────────────────────────────────── */
@@ -56,9 +73,7 @@ a { text-decoration: none; color: inherit; }
   max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
-  /* Cream paper */
   background-color: #f7f3e5;
-  /* Margin line + ruled lines */
   background-image:
     linear-gradient(90deg,
       transparent 55px,
@@ -93,9 +108,10 @@ a { text-decoration: none; color: inherit; }
   color: #2a1e14; flex: 1; min-width: 0;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
-.hdr-edit {
+/* "Uredi" on recipe page / "+" on category page */
+.hdr-action {
   font-size: 17px; color: rgba(42,30,20,0.45);
-  padding: 4px 6px; flex: none; display: none;
+  padding: 4px 8px; flex: none; display: none;
 }
 .hdr-sundry {
   font-size: 14px; color: rgba(42,30,20,0.36);
@@ -108,7 +124,7 @@ a { text-decoration: none; color: inherit; }
   font-size: 19px; color: rgba(42,30,20,0.42);
 }
 
-.cat-list { padding: 4px 0 90px; }
+.cat-list { padding: 4px 0 60px; }
 
 .cat-row {
   display: flex; align-items: center; gap: 12px;
@@ -127,7 +143,7 @@ a { text-decoration: none; color: inherit; }
 .cat-arrow { font-size: 22px; color: #c94040; flex: none; }
 
 /* ── Recipe list ─────────────────────────────────────── */
-.recipe-list { padding: 0 0 90px; }
+.recipe-list { padding: 0 0 60px; }
 
 .recipe-row {
   display: flex; align-items: center; gap: 10px;
@@ -149,7 +165,7 @@ a { text-decoration: none; color: inherit; }
 }
 
 /* ── Recipe view ─────────────────────────────────────── */
-.recipe-view { padding: 26px 20px 100px 72px; }
+.recipe-view { padding: 26px 20px 60px 72px; }
 
 /* Croatian title: double-rectangle box */
 .title-hr {
@@ -164,7 +180,6 @@ a { text-decoration: none; color: inherit; }
   border: 2px solid #c94040;
   padding: 5px 12px;
 }
-/* Outer border slightly offset – creates the double-box look */
 .title-hr::after {
   content: '';
   position: absolute;
@@ -189,22 +204,19 @@ a { text-decoration: none; color: inherit; }
 }
 .ruffle-end { display: block; flex: none; }
 
-/* Section labels */
 .recipe-lbl {
   font-size: 11px; font-weight: 700;
   letter-spacing: 2.5px; text-transform: uppercase;
   color: rgba(42,30,20,0.36);
   margin: 22px 0 8px;
 }
-
-/* Recipe body text – looks like handwriting on lines */
 .recipe-body {
   font-size: 20px; line-height: 2;
   color: #2a1e14; white-space: pre-wrap;
 }
 
 /* ── Add / Edit form ─────────────────────────────────── */
-.form-page { padding: 8px 0 100px; }
+.form-page { padding: 8px 0 60px; }
 
 .form-lbl {
   display: block;
@@ -247,24 +259,6 @@ a { text-decoration: none; color: inherit; }
   text-align: center;
 }
 
-/* ── Floating add button ─────────────────────────────── */
-#fab {
-  position: fixed; bottom: 24px; right: 24px;
-  width: 54px; height: 54px; border-radius: 50%;
-  background: #c94040; color: white;
-  font-size: 30px; line-height: 1;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 3px 12px rgba(201,64,64,0.4), 3px 3px 0 rgba(0,0,0,0.12);
-  border: 2px solid rgba(0,0,0,0.1);
-  z-index: 40;
-  transition: transform 0.15s;
-}
-#fab:active { transform: scale(0.93); }
-
-@media (min-width: 480px) {
-  #fab { right: calc(50% - 240px + 24px); }
-}
-
 </style>
 </head>
 <body>
@@ -277,8 +271,6 @@ a { text-decoration: none; color: inherit; }
        xmlns="http://www.w3.org/2000/svg"
        preserveAspectRatio="xMidYMid slice">
     <defs>
-
-      <!-- Teal gradient base, lighter top-left → darker bottom-right -->
       <linearGradient id="g-base" x1="0%" y1="0%" x2="100%" y2="100%">
         <stop offset="0%"   stop-color="#c8eaee"/>
         <stop offset="25%"  stop-color="#72c4cc"/>
@@ -286,14 +278,10 @@ a { text-decoration: none; color: inherit; }
         <stop offset="80%"  stop-color="#267888"/>
         <stop offset="100%" stop-color="#165060"/>
       </linearGradient>
-
-      <!-- Soft highlight in the top-left corner -->
       <radialGradient id="g-highlight" cx="14%" cy="8%" r="52%">
         <stop offset="0%"   stop-color="rgba(255,255,255,0.30)"/>
         <stop offset="100%" stop-color="transparent"/>
       </radialGradient>
-
-      <!-- Displacement map to warp the veins into organic marble swirls -->
       <filter id="marble" x="-10%" y="-10%" width="120%" height="120%">
         <feTurbulence type="turbulence"
           baseFrequency="0.013 0.007"
@@ -301,50 +289,40 @@ a { text-decoration: none; color: inherit; }
         <feDisplacementMap in="SourceGraphic" in2="n"
           scale="65" xChannelSelector="R" yChannelSelector="G"/>
       </filter>
-
     </defs>
 
-    <!-- Base teal wash -->
     <rect width="390" height="844" fill="url(#g-base)"/>
 
-    <!-- Veins layer — flat lines that get warped into marble swirls by the filter -->
     <g filter="url(#marble)">
-      <!-- Wide white arc (main sweep, bottom-left to upper-right) -->
       <line x1="-70" y1="740" x2="490" y2="475"
             stroke="white" stroke-width="48" stroke-linecap="round" opacity="0.90"/>
-      <!-- Second white arc, slightly narrower -->
       <line x1="-70" y1="695" x2="490" y2="430"
             stroke="white" stroke-width="22" stroke-linecap="round" opacity="0.75"/>
-      <!-- Thin bright arc -->
       <line x1="-70" y1="658" x2="490" y2="393"
             stroke="white" stroke-width="11" stroke-linecap="round" opacity="0.82"/>
-      <!-- Hairline accent -->
       <line x1="-70" y1="628" x2="490" y2="363"
             stroke="white" stroke-width="5"  stroke-linecap="round" opacity="0.60"/>
-
-      <!-- Rose-gold / copper vein running beneath the white arcs -->
       <line x1="-70" y1="762" x2="490" y2="497"
             stroke="#c89855" stroke-width="13" stroke-linecap="round" opacity="0.58"/>
       <line x1="-70" y1="749" x2="490" y2="484"
             stroke="#e8cc88" stroke-width="5"  stroke-linecap="round" opacity="0.42"/>
-
-      <!-- Dark navy vein cutting diagonally through the lower-right -->
       <line x1="270" y1="860" x2="316" y2="-20"
             stroke="#0c1e2e" stroke-width="7" stroke-linecap="round" opacity="0.48"/>
       <line x1="280" y1="860" x2="326" y2="-20"
             stroke="#0c1e2e" stroke-width="3" stroke-linecap="round" opacity="0.28"/>
     </g>
 
-    <!-- Highlight shimmer overlay -->
     <rect width="390" height="844" fill="url(#g-highlight)"/>
   </svg>
 
-  <!-- Gold "Kuharica" label — bottom-left, matching the physical notebook -->
-  <div class="cover-label">
-    <span class="cover-script">Kuharica</span>
+  <!-- Bottom-left: gold label + visible open button -->
+  <div class="cover-bottom">
+    <div class="cover-label">
+      <span class="cover-script">Kuharica</span>
+    </div>
+    <button class="cover-open" id="cover-open-btn">Otvori kuharicu →</button>
   </div>
 
-  <span class="cover-hint">dodirnite za otvaranje</span>
 </div>
 
 
@@ -354,13 +332,11 @@ a { text-decoration: none; color: inherit; }
   <header class="hdr" id="hdr">
     <button class="hdr-back" id="back-btn">←</button>
     <div class="hdr-title" id="hdr-title">Kuharica</div>
-    <button class="hdr-edit" id="hdr-edit">Uredi</button>
+    <button class="hdr-action" id="hdr-action">Uredi</button>
     <a class="hdr-sundry" href="/">Sundry</a>
   </header>
 
   <main id="main"></main>
-
-  <button id="fab" aria-label="Dodaj recept">+</button>
 
 </div>
 
@@ -378,6 +354,26 @@ const CATS = [
   { id: 'ostalo',   hr: 'Ostalo',          en: 'Other',          icon: '📌' },
 ];
 
+/* ── Default recipes (from the notebook) ─────────────── */
+const DEFAULTS = [
+  {
+    id: 'fritterice',
+    nameHr: 'Friterke od Tikvica',
+    nameEn: 'Courgette Fritters',
+    cat: 'predjela',
+    ingredients: '- 120g courgette\n- 1/2 tsp salt',
+    method: 'Grate the courgette (do not peel it).\nAdd the salt and let it sit for a few min. Drain the water.\n\nAdd following:\n- 1 large egg\n- 1/2 tsp baking powder\n- 3 tbsp plain flour\n- cca 35g grated parmesan cheese\n\nShallow fry them by using tablespoon as a measurement.',
+  },
+  {
+    id: 'jufka',
+    nameHr: 'Jufka',
+    nameEn: 'Filo Pastry',
+    cat: 'kruh',
+    ingredients: '- 500g bread flour\n- salt\n- 1 tbsp sunflower oil\n- 350ml lukewarm water',
+    method: 'Form into ball, place in oily container, oil it on top and cover.\nLeave in fridge 1–2:30 hours. Best if left overnight.\n\nOnce you want to use it, take out of the fridge 10–15 min before stretching.\n\nAll pies are baked in oven at 250°c around 20 min.',
+  },
+];
+
 /* ── localStorage helpers ────────────────────────────── */
 function db() {
   try { return JSON.parse(localStorage.getItem('kuharica.v1') || '[]'); }
@@ -385,6 +381,11 @@ function db() {
 }
 function dbSave(rows) {
   localStorage.setItem('kuharica.v1', JSON.stringify(rows));
+}
+
+/* Seed default recipes on first load */
+function seedDefaults() {
+  if (db().length === 0) dbSave(DEFAULTS);
 }
 
 /* ── Navigation state ────────────────────────────────── */
@@ -401,21 +402,16 @@ function nav(p, c, r) {
 }
 
 /* ── Scroll / ruffle end SVG ─────────────────────────── */
-/* Draws one rolled-paper end for the English title banner.
-   flip=true mirrors it for the right side. */
 function ruffleEnd(flip) {
   const mirror = flip ? 'transform="scale(-1,1) translate(-20,0)"' : '';
   return `<svg class="ruffle-end" width="20" height="30"
     viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
     <g ${mirror}>
-      <!-- Rolled paper cylinder shape -->
       <rect x="1" y="1" width="11" height="28" rx="4"
             stroke="#c94040" stroke-width="1.5" fill="#f2ede0"/>
-      <!-- Centre fold crease -->
       <line x1="6.5" y1="5" x2="6.5" y2="25"
             stroke="#c94040" stroke-width="1"
             stroke-dasharray="2 2" opacity="0.4"/>
-      <!-- Top and bottom lines connecting to banner -->
       <line x1="12" y1="1"  x2="20" y2="1"  stroke="#c94040" stroke-width="1.5"/>
       <line x1="12" y1="29" x2="20" y2="29" stroke="#c94040" stroke-width="1.5"/>
     </g>
@@ -454,7 +450,7 @@ function pageCategory() {
   const rows = db().filter(r => r.cat === catId);
 
   if (!rows.length) {
-    return `<p class="list-empty">Nema recepata još.<br>Pritisni + za dodavanje!</p>`;
+    return `<p class="list-empty">Nema recepata još.<br>Pritisni + u zaglavlju za dodavanje.</p>`;
   }
 
   return `<div class="recipe-list">
@@ -484,12 +480,10 @@ function pageRecipe() {
 
   return `<div class="recipe-view">
 
-    <!-- Croatian name: double-border box -->
     <div class="title-hr">
       <div class="title-hr-inner">${esc(r.nameHr.toUpperCase())}</div>
     </div>
 
-    <!-- English name: scroll/ruffle ribbon -->
     ${enBanner}
 
     ${r.ingredients ? `
@@ -538,7 +532,7 @@ function pageForm(editId) {
     <div class="form-actions">
       <button class="btn-save"
               onclick="saveRecipe(${editId ? `'${editId}'` : 'null'})">
-        ${editId ? 'Spremi promjene' : 'Dodaj recept +'}
+        ${editId ? 'Spremi promjene' : 'Dodaj recept'}
       </button>
       ${editId
         ? `<button class="btn-delete" onclick="deleteRecipe('${editId}')">Obriši recept</button>`
@@ -582,15 +576,14 @@ function deleteRecipe(id) {
 
 /* ── Render ──────────────────────────────────────────── */
 function render() {
-  const main    = document.getElementById('main');
-  const backBtn = document.getElementById('back-btn');
-  const titleEl = document.getElementById('hdr-title');
-  const editBtn = document.getElementById('hdr-edit');
-  const fab     = document.getElementById('fab');
+  const main      = document.getElementById('main');
+  const backBtn   = document.getElementById('back-btn');
+  const titleEl   = document.getElementById('hdr-title');
+  const actionBtn = document.getElementById('hdr-action');
 
-  backBtn.style.display = page === 'home' ? 'none' : '';
-  editBtn.style.display = 'none';
-  fab.style.display     = (page === 'add' || page === 'edit') ? 'none' : '';
+  backBtn.style.display  = page === 'home' ? 'none' : '';
+  actionBtn.style.display = 'none';
+  actionBtn.onclick = null;
 
   switch (page) {
 
@@ -602,15 +595,22 @@ function render() {
     case 'category': {
       const cat = CATS.find(c => c.id === catId);
       titleEl.textContent = cat ? cat.hr : '';
+      /* "+" in header to add a recipe to this category */
+      actionBtn.textContent  = '+';
+      actionBtn.style.display = '';
+      actionBtn.style.fontSize = '26px';
+      actionBtn.onclick = () => nav('add');
       main.innerHTML = pageCategory();
       break;
     }
 
     case 'recipe': {
       const r = db().find(x => x.id === recipeId);
-      titleEl.textContent = r ? r.nameHr : 'Recept';
-      editBtn.style.display = '';
-      editBtn.onclick = () => nav('edit', catId, recipeId);
+      titleEl.textContent    = r ? r.nameHr : 'Recept';
+      actionBtn.textContent  = 'Uredi';
+      actionBtn.style.display = '';
+      actionBtn.style.fontSize = '17px';
+      actionBtn.onclick = () => nav('edit', catId, recipeId);
       main.innerHTML = pageRecipe();
       break;
     }
@@ -629,20 +629,24 @@ function render() {
 
 /* ── Event listeners ─────────────────────────────────── */
 document.getElementById('back-btn').addEventListener('click', () => {
-  if (page === 'category')        nav('home');
-  else if (page === 'recipe')     nav('category', catId);
-  else if (page === 'add')        nav(catId ? 'category' : 'home', catId);
-  else if (page === 'edit')       nav('recipe', catId, recipeId);
+  if (page === 'category')    nav('home');
+  else if (page === 'recipe') nav('category', catId);
+  else if (page === 'add')    nav(catId ? 'category' : 'home', catId);
+  else if (page === 'edit')   nav('recipe', catId, recipeId);
 });
 
-document.getElementById('fab').addEventListener('click', () => nav('add'));
-
-document.getElementById('cover').addEventListener('click', () => {
+function openApp() {
   document.getElementById('cover').classList.add('out');
   setTimeout(() => { document.getElementById('cover').style.display = 'none'; }, 700);
+}
+document.getElementById('cover-open-btn').addEventListener('click', openApp);
+document.getElementById('cover').addEventListener('click', e => {
+  if (e.target === document.getElementById('cover-open-btn')) return;
+  openApp();
 });
 
 /* ── Boot ────────────────────────────────────────────── */
+seedDefaults();
 render();
 
 </script>
