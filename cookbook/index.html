@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="hr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kuharica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;600;700&family=Dancing+Script:wght@600;700&display=swap" rel="stylesheet">
+<style>
+
+/* ── Reset ───────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { -webkit-text-size-adjust: 100%; height: 100%; }
+body { font-family: 'Caveat', cursive; background: #1c3540; min-height: 100dvh; }
+button { font-family: inherit; cursor: pointer; border: none; background: none; }
+input, textarea, select { font-family: inherit; }
+a { text-decoration: none; color: inherit; }
+
+/* ── Cover ───────────────────────────────────────────── */
+#cover {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: flex-end; justify-content: flex-start;
+  padding: 44px 34px;
+  cursor: pointer;
+  transition: opacity 0.7s ease;
+}
+#cover.out { opacity: 0; pointer-events: none; }
+
+#cover-svg {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+}
+
+.cover-label {
+  position: relative; z-index: 2;
+  border: 1.5px solid #c8a44e;
+  padding: 9px 20px 8px;
+  display: inline-block;
+}
+.cover-script {
+  font-family: 'Dancing Script', cursive;
+  font-weight: 700; font-size: 40px;
+  color: #c8a44e; line-height: 1;
+  display: block;
+}
+
+.cover-hint {
+  position: absolute; z-index: 2;
+  bottom: 20px; right: 24px;
+  font-size: 14px; color: rgba(255,255,255,0.5);
+}
+
+/* ── Notebook shell ──────────────────────────────────── */
+#app {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  /* Cream paper */
+  background-color: #f7f3e5;
+  /* Margin line + ruled lines */
+  background-image:
+    linear-gradient(90deg,
+      transparent 55px,
+      rgba(210,80,80,0.2) 55px,
+      rgba(210,80,80,0.2) 57px,
+      transparent 57px
+    ),
+    repeating-linear-gradient(
+      transparent 0px, transparent 29px,
+      rgba(110,130,200,0.17) 29px, rgba(110,130,200,0.17) 30px
+    );
+}
+
+/* ── Header ──────────────────────────────────────────── */
+.hdr {
+  position: sticky; top: 0; z-index: 50;
+  display: flex; align-items: center; gap: 10px;
+  padding: 10px 14px;
+  min-height: 54px;
+  background: rgba(247,243,229,0.96);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid rgba(110,130,200,0.17);
+}
+.hdr-back {
+  font-size: 26px; color: #c94040;
+  line-height: 1; padding: 2px 4px;
+  flex: none; display: none;
+}
+.hdr-title {
+  font-family: 'Dancing Script', cursive;
+  font-size: 26px; font-weight: 700;
+  color: #2a1e14; flex: 1; min-width: 0;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hdr-edit {
+  font-size: 17px; color: rgba(42,30,20,0.45);
+  padding: 4px 6px; flex: none; display: none;
+}
+.hdr-sundry {
+  font-size: 14px; color: rgba(42,30,20,0.36);
+  flex: none;
+}
+
+/* ── Home – category list ────────────────────────────── */
+.home-intro {
+  padding: 22px 16px 6px 72px;
+  font-size: 19px; color: rgba(42,30,20,0.42);
+}
+
+.cat-list { padding: 4px 0 90px; }
+
+.cat-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 13px 16px 13px 72px;
+  border-bottom: 1px solid rgba(110,130,200,0.14);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.cat-row:active { background: rgba(201,64,64,0.06); }
+.cat-icon  { font-size: 24px; flex: none; }
+.cat-info  { flex: 1; min-width: 0; }
+.cat-hr    { display: block; font-size: 24px; font-weight: 600; color: #2a1e14; line-height: 1.1; }
+.cat-en    { display: block; font-size: 16px; color: rgba(42,30,20,0.42); }
+.cat-count { font-size: 16px; color: rgba(42,30,20,0.36); flex: none; }
+.cat-arrow { font-size: 22px; color: #c94040; flex: none; }
+
+/* ── Recipe list ─────────────────────────────────────── */
+.recipe-list { padding: 0 0 90px; }
+
+.recipe-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px 14px 72px;
+  border-bottom: 1px solid rgba(110,130,200,0.14);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.1s;
+}
+.recipe-row:active { background: rgba(201,64,64,0.06); }
+.rr-body   { flex: 1; min-width: 0; }
+.rr-hr     { font-size: 22px; font-weight: 600; color: #2a1e14; line-height: 1.15; }
+.rr-en     { font-size: 16px; color: rgba(42,30,20,0.42); }
+.rr-arrow  { font-size: 20px; color: #c94040; flex: none; }
+
+.list-empty {
+  padding: 50px 16px 20px 72px;
+  font-size: 20px; color: rgba(42,30,20,0.38); line-height: 1.7;
+}
+
+/* ── Recipe view ─────────────────────────────────────── */
+.recipe-view { padding: 26px 20px 100px 72px; }
+
+/* Croatian title: double-rectangle box */
+.title-hr {
+  display: inline-block; position: relative;
+  margin-bottom: 6px;
+}
+.title-hr-inner {
+  display: inline-block;
+  font-size: 22px; font-weight: 700;
+  color: #c94040; text-transform: uppercase; letter-spacing: 0.5px;
+  line-height: 1.25;
+  border: 2px solid #c94040;
+  padding: 5px 12px;
+}
+/* Outer border slightly offset – creates the double-box look */
+.title-hr::after {
+  content: '';
+  position: absolute;
+  inset: 4px -5px -5px 4px;
+  border: 1.5px solid rgba(201,64,64,0.32);
+  pointer-events: none;
+}
+
+/* English title: scroll / ruffle banner */
+.title-en {
+  display: flex; align-items: stretch;
+  margin-top: 10px; margin-bottom: 26px;
+}
+.ruffle-text {
+  flex: 1;
+  border-top: 2px solid #c94040;
+  border-bottom: 2px solid #c94040;
+  padding: 5px 10px;
+  font-size: 17px; font-weight: 600;
+  color: #c94040; text-transform: uppercase;
+  letter-spacing: 0.5px; text-align: center; line-height: 1.3;
+}
+.ruffle-end { display: block; flex: none; }
+
+/* Section labels */
+.recipe-lbl {
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2.5px; text-transform: uppercase;
+  color: rgba(42,30,20,0.36);
+  margin: 22px 0 8px;
+}
+
+/* Recipe body text – looks like handwriting on lines */
+.recipe-body {
+  font-size: 20px; line-height: 2;
+  color: #2a1e14; white-space: pre-wrap;
+}
+
+/* ── Add / Edit form ─────────────────────────────────── */
+.form-page { padding: 8px 0 100px; }
+
+.form-lbl {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: rgba(42,30,20,0.38);
+  padding: 18px 16px 4px 72px;
+}
+.form-field {
+  width: 100%; background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(201,64,64,0.22);
+  padding: 6px 16px 8px 72px;
+  font-size: 22px; color: #2a1e14;
+  outline: none; resize: none; display: block;
+}
+.form-field:focus { border-bottom-color: #c94040; }
+.form-field::placeholder { color: rgba(42,30,20,0.26); }
+
+.form-actions { padding: 28px 16px 0; }
+
+.btn-save {
+  display: block; width: 100%;
+  background: #c94040; color: white;
+  font-size: 22px; font-weight: 700;
+  border: 2px solid rgba(0,0,0,0.1);
+  border-radius: 8px; padding: 14px;
+  box-shadow: 3px 3px 0 rgba(0,0,0,0.15);
+  text-align: center;
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+.btn-save:active { transform: translate(1px,1px); box-shadow: 2px 2px 0 rgba(0,0,0,0.15); }
+
+.btn-delete {
+  display: block; width: 100%;
+  margin-top: 12px;
+  font-size: 18px; color: rgba(42,30,20,0.38);
+  border: 1.5px solid rgba(42,30,20,0.16);
+  border-radius: 8px; padding: 11px;
+  text-align: center;
+}
+
+/* ── Floating add button ─────────────────────────────── */
+#fab {
+  position: fixed; bottom: 24px; right: 24px;
+  width: 54px; height: 54px; border-radius: 50%;
+  background: #c94040; color: white;
+  font-size: 30px; line-height: 1;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 3px 12px rgba(201,64,64,0.4), 3px 3px 0 rgba(0,0,0,0.12);
+  border: 2px solid rgba(0,0,0,0.1);
+  z-index: 40;
+  transition: transform 0.15s;
+}
+#fab:active { transform: scale(0.93); }
+
+@media (min-width: 480px) {
+  #fab { right: calc(50% - 240px + 24px); }
+}
+
+</style>
+</head>
+<body>
+
+<!-- ── Cover ──────────────────────────────────────────── -->
+<div id="cover">
+
+  <!-- Marble SVG — replicates the teal notebook cover -->
+  <svg id="cover-svg" viewBox="0 0 390 844"
+       xmlns="http://www.w3.org/2000/svg"
+       preserveAspectRatio="xMidYMid slice">
+    <defs>
+
+      <!-- Teal gradient base, lighter top-left → darker bottom-right -->
+      <linearGradient id="g-base" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%"   stop-color="#c8eaee"/>
+        <stop offset="25%"  stop-color="#72c4cc"/>
+        <stop offset="55%"  stop-color="#42a8b4"/>
+        <stop offset="80%"  stop-color="#267888"/>
+        <stop offset="100%" stop-color="#165060"/>
+      </linearGradient>
+
+      <!-- Soft highlight in the top-left corner -->
+      <radialGradient id="g-highlight" cx="14%" cy="8%" r="52%">
+        <stop offset="0%"   stop-color="rgba(255,255,255,0.30)"/>
+        <stop offset="100%" stop-color="transparent"/>
+      </radialGradient>
+
+      <!-- Displacement map to warp the veins into organic marble swirls -->
+      <filter id="marble" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="turbulence"
+          baseFrequency="0.013 0.007"
+          numOctaves="4" seed="9" result="n"/>
+        <feDisplacementMap in="SourceGraphic" in2="n"
+          scale="65" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+
+    </defs>
+
+    <!-- Base teal wash -->
+    <rect width="390" height="844" fill="url(#g-base)"/>
+
+    <!-- Veins layer — flat lines that get warped into marble swirls by the filter -->
+    <g filter="url(#marble)">
+      <!-- Wide white arc (main sweep, bottom-left to upper-right) -->
+      <line x1="-70" y1="740" x2="490" y2="475"
+            stroke="white" stroke-width="48" stroke-linecap="round" opacity="0.90"/>
+      <!-- Second white arc, slightly narrower -->
+      <line x1="-70" y1="695" x2="490" y2="430"
+            stroke="white" stroke-width="22" stroke-linecap="round" opacity="0.75"/>
+      <!-- Thin bright arc -->
+      <line x1="-70" y1="658" x2="490" y2="393"
+            stroke="white" stroke-width="11" stroke-linecap="round" opacity="0.82"/>
+      <!-- Hairline accent -->
+      <line x1="-70" y1="628" x2="490" y2="363"
+            stroke="white" stroke-width="5"  stroke-linecap="round" opacity="0.60"/>
+
+      <!-- Rose-gold / copper vein running beneath the white arcs -->
+      <line x1="-70" y1="762" x2="490" y2="497"
+            stroke="#c89855" stroke-width="13" stroke-linecap="round" opacity="0.58"/>
+      <line x1="-70" y1="749" x2="490" y2="484"
+            stroke="#e8cc88" stroke-width="5"  stroke-linecap="round" opacity="0.42"/>
+
+      <!-- Dark navy vein cutting diagonally through the lower-right -->
+      <line x1="270" y1="860" x2="316" y2="-20"
+            stroke="#0c1e2e" stroke-width="7" stroke-linecap="round" opacity="0.48"/>
+      <line x1="280" y1="860" x2="326" y2="-20"
+            stroke="#0c1e2e" stroke-width="3" stroke-linecap="round" opacity="0.28"/>
+    </g>
+
+    <!-- Highlight shimmer overlay -->
+    <rect width="390" height="844" fill="url(#g-highlight)"/>
+  </svg>
+
+  <!-- Gold "Kuharica" label — bottom-left, matching the physical notebook -->
+  <div class="cover-label">
+    <span class="cover-script">Kuharica</span>
+  </div>
+
+  <span class="cover-hint">dodirnite za otvaranje</span>
+</div>
+
+
+<!-- ── App ────────────────────────────────────────────── -->
+<div id="app">
+
+  <header class="hdr" id="hdr">
+    <button class="hdr-back" id="back-btn">←</button>
+    <div class="hdr-title" id="hdr-title">Kuharica</div>
+    <button class="hdr-edit" id="hdr-edit">Uredi</button>
+    <a class="hdr-sundry" href="/">Sundry</a>
+  </header>
+
+  <main id="main"></main>
+
+  <button id="fab" aria-label="Dodaj recept">+</button>
+
+</div>
+
+
+<script>
+
+/* ── Categories ──────────────────────────────────────── */
+const CATS = [
+  { id: 'juhe',     hr: 'Juhe',           en: 'Soups',          icon: '🍲' },
+  { id: 'predjela', hr: 'Predjela',        en: 'Starters',       icon: '🥗' },
+  { id: 'glavna',   hr: 'Glavna Jela',     en: 'Mains',          icon: '🍽️'  },
+  { id: 'salate',   hr: 'Salate',          en: 'Salads',         icon: '🥙' },
+  { id: 'deserti',  hr: 'Deserti',         en: 'Desserts',       icon: '🍰' },
+  { id: 'kruh',     hr: 'Kruh & Tijesto',  en: 'Bread & Pastry', icon: '🥖' },
+  { id: 'ostalo',   hr: 'Ostalo',          en: 'Other',          icon: '📌' },
+];
+
+/* ── localStorage helpers ────────────────────────────── */
+function db() {
+  try { return JSON.parse(localStorage.getItem('kuharica.v1') || '[]'); }
+  catch { return []; }
+}
+function dbSave(rows) {
+  localStorage.setItem('kuharica.v1', JSON.stringify(rows));
+}
+
+/* ── Navigation state ────────────────────────────────── */
+let page     = 'home';
+let catId    = null;
+let recipeId = null;
+
+function nav(p, c, r) {
+  page = p;
+  if (c !== undefined) catId    = c;
+  if (r !== undefined) recipeId = r;
+  render();
+  window.scrollTo(0, 0);
+}
+
+/* ── Scroll / ruffle end SVG ─────────────────────────── */
+/* Draws one rolled-paper end for the English title banner.
+   flip=true mirrors it for the right side. */
+function ruffleEnd(flip) {
+  const mirror = flip ? 'transform="scale(-1,1) translate(-20,0)"' : '';
+  return `<svg class="ruffle-end" width="20" height="30"
+    viewBox="0 0 20 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <g ${mirror}>
+      <!-- Rolled paper cylinder shape -->
+      <rect x="1" y="1" width="11" height="28" rx="4"
+            stroke="#c94040" stroke-width="1.5" fill="#f2ede0"/>
+      <!-- Centre fold crease -->
+      <line x1="6.5" y1="5" x2="6.5" y2="25"
+            stroke="#c94040" stroke-width="1"
+            stroke-dasharray="2 2" opacity="0.4"/>
+      <!-- Top and bottom lines connecting to banner -->
+      <line x1="12" y1="1"  x2="20" y2="1"  stroke="#c94040" stroke-width="1.5"/>
+      <line x1="12" y1="29" x2="20" y2="29" stroke="#c94040" stroke-width="1.5"/>
+    </g>
+  </svg>`;
+}
+
+/* ── HTML helpers ────────────────────────────────────── */
+function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function attr(s) { return String(s).replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+/* ── Page: Home ──────────────────────────────────────── */
+function pageHome() {
+  const rows   = db();
+  const counts = {};
+  rows.forEach(r => { counts[r.cat] = (counts[r.cat] || 0) + 1; });
+
+  return `
+    <p class="home-intro">Moji recepti</p>
+    <div class="cat-list">
+      ${CATS.map(c => `
+        <div class="cat-row" onclick="nav('category','${c.id}')">
+          <span class="cat-icon">${c.icon}</span>
+          <span class="cat-info">
+            <span class="cat-hr">${c.hr}</span>
+            <span class="cat-en">${c.en}</span>
+          </span>
+          <span class="cat-count">${counts[c.id] || 0}</span>
+          <span class="cat-arrow">›</span>
+        </div>
+      `).join('')}
+    </div>`;
+}
+
+/* ── Page: Category (recipe list) ────────────────────── */
+function pageCategory() {
+  const rows = db().filter(r => r.cat === catId);
+
+  if (!rows.length) {
+    return `<p class="list-empty">Nema recepata još.<br>Pritisni + za dodavanje!</p>`;
+  }
+
+  return `<div class="recipe-list">
+    ${rows.map(r => `
+      <div class="recipe-row" onclick="nav('recipe','${catId}','${r.id}')">
+        <div class="rr-body">
+          <div class="rr-hr">${esc(r.nameHr)}</div>
+          ${r.nameEn ? `<div class="rr-en">${esc(r.nameEn)}</div>` : ''}
+        </div>
+        <span class="rr-arrow">›</span>
+      </div>
+    `).join('')}
+  </div>`;
+}
+
+/* ── Page: Recipe view ───────────────────────────────── */
+function pageRecipe() {
+  const r = db().find(x => x.id === recipeId);
+  if (!r) return `<p class="list-empty">Recept nije pronađen.</p>`;
+
+  const enBanner = r.nameEn ? `
+    <div class="title-en">
+      ${ruffleEnd(false)}
+      <div class="ruffle-text">${esc(r.nameEn.toUpperCase())}</div>
+      ${ruffleEnd(true)}
+    </div>` : '';
+
+  return `<div class="recipe-view">
+
+    <!-- Croatian name: double-border box -->
+    <div class="title-hr">
+      <div class="title-hr-inner">${esc(r.nameHr.toUpperCase())}</div>
+    </div>
+
+    <!-- English name: scroll/ruffle ribbon -->
+    ${enBanner}
+
+    ${r.ingredients ? `
+      <p class="recipe-lbl">Sastojci · Ingredients</p>
+      <p class="recipe-body">${esc(r.ingredients)}</p>
+    ` : ''}
+
+    ${r.method ? `
+      <p class="recipe-lbl">Priprema · Method</p>
+      <p class="recipe-body">${esc(r.method)}</p>
+    ` : ''}
+
+  </div>`;
+}
+
+/* ── Page: Add / Edit form ───────────────────────────── */
+function pageForm(editId) {
+  const r    = editId ? db().find(x => x.id === editId) : null;
+  const opts = CATS.map(c =>
+    `<option value="${c.id}" ${(r ? r.cat : catId) === c.id ? 'selected' : ''}>${c.hr} / ${c.en}</option>`
+  ).join('');
+
+  return `<div class="form-page">
+
+    <label class="form-lbl">Naziv (HR)</label>
+    <input  class="form-field" id="f-hr" type="text"
+            placeholder="Naziv recepta…"
+            value="${attr(r?.nameHr || '')}" autocomplete="off">
+
+    <label class="form-lbl">Name (EN)</label>
+    <input  class="form-field" id="f-en" type="text"
+            placeholder="Recipe name…"
+            value="${attr(r?.nameEn || '')}" autocomplete="off">
+
+    <label class="form-lbl">Kategorija / Category</label>
+    <select class="form-field" id="f-cat">${opts}</select>
+
+    <label class="form-lbl">Sastojci · Ingredients</label>
+    <textarea class="form-field" id="f-ing" rows="6"
+              placeholder="- 500g brašno&#10;- 1 žlica soli…">${esc(r?.ingredients || '')}</textarea>
+
+    <label class="form-lbl">Priprema · Method</label>
+    <textarea class="form-field" id="f-mth" rows="8"
+              placeholder="Pomiješaj sastojke…">${esc(r?.method || '')}</textarea>
+
+    <div class="form-actions">
+      <button class="btn-save"
+              onclick="saveRecipe(${editId ? `'${editId}'` : 'null'})">
+        ${editId ? 'Spremi promjene' : 'Dodaj recept +'}
+      </button>
+      ${editId
+        ? `<button class="btn-delete" onclick="deleteRecipe('${editId}')">Obriši recept</button>`
+        : ''}
+    </div>
+
+  </div>`;
+}
+
+/* ── Actions ─────────────────────────────────────────── */
+function saveRecipe(editId) {
+  const nameHr = document.getElementById('f-hr').value.trim();
+  if (!nameHr) { alert('Upiši naziv recepta!'); return; }
+
+  const rows = db();
+  const payload = {
+    id:          editId || Math.random().toString(36).slice(2),
+    nameHr,
+    nameEn:      document.getElementById('f-en').value.trim(),
+    cat:         document.getElementById('f-cat').value,
+    ingredients: document.getElementById('f-ing').value.trim(),
+    method:      document.getElementById('f-mth').value.trim(),
+  };
+
+  if (editId) {
+    const i = rows.findIndex(r => r.id === editId);
+    rows[i] = payload;
+  } else {
+    rows.push(payload);
+  }
+
+  dbSave(rows);
+  nav('recipe', payload.cat, payload.id);
+}
+
+function deleteRecipe(id) {
+  if (!confirm('Obrisati recept?')) return;
+  dbSave(db().filter(r => r.id !== id));
+  nav('category', catId);
+}
+
+/* ── Render ──────────────────────────────────────────── */
+function render() {
+  const main    = document.getElementById('main');
+  const backBtn = document.getElementById('back-btn');
+  const titleEl = document.getElementById('hdr-title');
+  const editBtn = document.getElementById('hdr-edit');
+  const fab     = document.getElementById('fab');
+
+  backBtn.style.display = page === 'home' ? 'none' : '';
+  editBtn.style.display = 'none';
+  fab.style.display     = (page === 'add' || page === 'edit') ? 'none' : '';
+
+  switch (page) {
+
+    case 'home':
+      titleEl.textContent = 'Kuharica';
+      main.innerHTML = pageHome();
+      break;
+
+    case 'category': {
+      const cat = CATS.find(c => c.id === catId);
+      titleEl.textContent = cat ? cat.hr : '';
+      main.innerHTML = pageCategory();
+      break;
+    }
+
+    case 'recipe': {
+      const r = db().find(x => x.id === recipeId);
+      titleEl.textContent = r ? r.nameHr : 'Recept';
+      editBtn.style.display = '';
+      editBtn.onclick = () => nav('edit', catId, recipeId);
+      main.innerHTML = pageRecipe();
+      break;
+    }
+
+    case 'add':
+      titleEl.textContent = 'Novi recept';
+      main.innerHTML = pageForm(null);
+      break;
+
+    case 'edit':
+      titleEl.textContent = 'Uredi recept';
+      main.innerHTML = pageForm(recipeId);
+      break;
+  }
+}
+
+/* ── Event listeners ─────────────────────────────────── */
+document.getElementById('back-btn').addEventListener('click', () => {
+  if (page === 'category')        nav('home');
+  else if (page === 'recipe')     nav('category', catId);
+  else if (page === 'add')        nav(catId ? 'category' : 'home', catId);
+  else if (page === 'edit')       nav('recipe', catId, recipeId);
+});
+
+document.getElementById('fab').addEventListener('click', () => nav('add'));
+
+document.getElementById('cover').addEventListener('click', () => {
+  document.getElementById('cover').classList.add('out');
+  setTimeout(() => { document.getElementById('cover').style.display = 'none'; }, 700);
+});
+
+/* ── Boot ────────────────────────────────────────────── */
+render();
+
+</script>
+</body>
+</html>
