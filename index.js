@@ -119,6 +119,17 @@ const PROJECTS = [
         "category": "Tool",
         "blurb": "Draw watering routes over your allotment plot grid.",
         "date": "2026-06-05"
+    },
+    {
+        "slug": "cookbook",
+        "path": "/apps/cookbook/",
+        "uses": 0,
+        "hue": 195,
+        "pattern": "waves",
+        "name": "Kuharica",
+        "category": "App",
+        "blurb": "A personal recipe book with Croatian and English — lined notepad style.",
+        "date": "2026-06-21"
     }
 ];
 
