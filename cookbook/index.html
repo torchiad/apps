@@ -629,10 +629,8 @@ function render() {
 
 /* ── Event listeners ─────────────────────────────────── */
 document.getElementById('back-btn').addEventListener('click', () => {
-  if (page === 'category')    nav('home');
-  else if (page === 'recipe') nav('category', catId);
-  else if (page === 'add')    nav(catId ? 'category' : 'home', catId);
-  else if (page === 'edit')   nav('recipe', catId, recipeId);
+  if (page === 'edit') nav('recipe', catId, recipeId);
+  else nav('home');
 });
 
 function openApp() {
