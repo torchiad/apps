@@ -9,6 +9,7 @@ const input = {
     index: path.resolve(__dirname, 'index.html'),
     shoreline: path.resolve(__dirname, 'shoreline/index.html'),
     hose_planner: path.resolve(__dirname, 'hose-planner/index.html'),
+    cookbook: path.resolve(__dirname, 'cookbook/index.html'),
 };
 
 export default defineConfig({
