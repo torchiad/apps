@@ -393,8 +393,15 @@ const MATCHES = [
 const PC = {AH:'ah',DH:'dh',DT:'dt',LT:'lt',TH:'th'};
 const MEDALS = ['🥇','🥈','🥉'];
 
+// Official confirmed results — seeded in if user hasn't set them yet
+// 1 = team1, 2 = team2
+const OFFICIAL = {
+  14: 2, // South Africa vs Canada → Canada won 1-0 (28 Jun, Eustaquio 90+2')
+};
+
 let results = {};
 try{results=JSON.parse(localStorage.getItem('wc26_results')||'{}');}catch(e){}
+Object.entries(OFFICIAL).forEach(([id,w])=>{ if(results[id]==null) results[id]=w; });
 function save(){try{localStorage.setItem('wc26_results',JSON.stringify(results));}catch(e){}}
 
 /* ── SCORES ────────────────────────────────── */
