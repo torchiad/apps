@@ -130,6 +130,17 @@ const PROJECTS = [
         "category": "App",
         "blurb": "A personal recipe book with Croatian and English — lined notepad style.",
         "date": "2026-06-21"
+    },
+    {
+        "slug": "world-cup-tracker",
+        "path": "/apps/world-cup-tracker/",
+        "uses": 0,
+        "hue": 130,
+        "pattern": "grid",
+        "name": "World Cup 2026",
+        "category": "App",
+        "blurb": "Track Last 32 predictions for AH, DH, DT, LT & TH — tap a team to set the winner and watch the leaderboard update live.",
+        "date": "2026-06-29"
     }
 ];
 

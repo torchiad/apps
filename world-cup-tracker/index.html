@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>World Cup 2026 — Last 32 Tracker</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+
+:root{
+  --bg:#0d1117;
+  --surface:#161b22;
+  --surface2:#1c2330;
+  --border:#30363d;
+  --text:#e6edf3;
+  --muted:#7d8590;
+  --green:#3fb950;
+  --green-dim:rgba(63,185,80,.15);
+  --red:#f85149;
+  --gold:#d29922;
+  --c-ah:#ef4444;
+  --c-dh:#3b82f6;
+  --c-dt:#22c55e;
+  --c-lt:#a855f7;
+  --c-th:#f59e0b;
+}
+
+html{font-size:16px}
+body{background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;min-height:100vh;padding-bottom:48px}
+
+/* ── HEADER ────────────────────────────────── */
+.site-header{
+  background:linear-gradient(160deg,#0d2818 0%,#0d1117 55%,#1a0d2e 100%);
+  border-bottom:1px solid var(--border);
+  padding:20px 16px 16px;
+  position:sticky;top:0;z-index:200;
+}
+.site-header h1{font-size:1.25rem;font-weight:700;letter-spacing:-.02em;display:flex;align-items:center;gap:8px}
+.site-header h1 .ball{font-size:1.4rem}
+.site-header p{color:var(--muted);font-size:.75rem;margin-top:3px}
+.back-link{display:inline-flex;align-items:center;gap:4px;font-size:.7rem;color:var(--muted);text-decoration:none;margin-bottom:10px;letter-spacing:.03em;text-transform:uppercase}
+.back-link:hover{color:var(--text)}
+.back-link svg{width:12px;height:12px}
+
+.progress-wrap{margin-top:12px}
+.progress-track{background:var(--border);border-radius:3px;height:3px;overflow:hidden}
+.progress-fill{background:linear-gradient(90deg,var(--green),#58a6ff);height:100%;border-radius:3px;transition:width .5s ease}
+.progress-labels{display:flex;justify-content:space-between;margin-top:5px;font-size:.65rem;color:var(--muted)}
+
+/* ── SECTION ────────────────────────────────── */
+.section{padding:14px 12px 0}
+.section-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);margin-bottom:10px;font-weight:600}
+
+/* ── LEADERBOARD ────────────────────────────── */
+.lb-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 14px 10px;margin:12px 12px 0}
+.lb-title{font-size:.7rem;text-transform:uppercase;letter-spacing:.1em;color:var(--gold);font-weight:700;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+.lb-rows{display:flex;flex-direction:column;gap:7px}
+.lb-row{display:grid;grid-template-columns:24px 46px 1fr 28px 32px;align-items:center;gap:6px}
+.lb-pos{font-size:.7rem;font-weight:700;text-align:center;color:var(--muted)}
+.lb-pos.p1{color:#f0c060}
+.lb-pos.p2{color:#adb5bd}
+.lb-pos.p3{color:#cd7f32}
+.lb-badge{font-size:.65rem;font-weight:700;padding:3px 0;border-radius:6px;text-align:center;letter-spacing:.02em}
+.lb-bar-bg{background:var(--surface2);border-radius:3px;height:18px;overflow:hidden;position:relative}
+.lb-bar-fill{height:100%;border-radius:3px;display:flex;align-items:center;padding-right:6px;justify-content:flex-end;transition:width .6s ease}
+.lb-bar-fill span{font-size:.6rem;font-weight:700;color:rgba(255,255,255,.85)}
+.lb-pts{font-size:.9rem;font-weight:700;text-align:right}
+.lb-max{font-size:.65rem;color:var(--muted);text-align:right}
+
+/* ── PLAYER COLORS ──────────────────────────── */
+.c-ah{background:rgba(239,68,68,.2);color:#fca5a5;border:1px solid rgba(239,68,68,.35)}
+.c-dh{background:rgba(59,130,246,.2);color:#93c5fd;border:1px solid rgba(59,130,246,.35)}
+.c-dt{background:rgba(34,197,94,.2);color:#86efac;border:1px solid rgba(34,197,94,.35)}
+.c-lt{background:rgba(168,85,247,.2);color:#d8b4fe;border:1px solid rgba(168,85,247,.35)}
+.c-th{background:rgba(245,158,11,.2);color:#fcd34d;border:1px solid rgba(245,158,11,.35)}
+
+.fill-ah{background:var(--c-ah)}
+.fill-dh{background:var(--c-dh)}
+.fill-dt{background:var(--c-dt)}
+.fill-lt{background:var(--c-lt)}
+.fill-th{background:var(--c-th)}
+
+/* ── LEGEND ─────────────────────────────────── */
+.legend{display:flex;gap:6px;flex-wrap:wrap;padding:8px 12px;margin:8px 12px 0;background:var(--surface);border:1px solid var(--border);border-radius:8px}
+.legend-item{display:flex;align-items:center;gap:4px}
+.chip{font-size:.6rem;font-weight:700;padding:2px 6px;border-radius:5px;letter-spacing:.03em}
+
+/* ── MATCHES ────────────────────────────────── */
+.matches{padding:0 12px;display:flex;flex-direction:column;gap:8px;margin-top:8px}
+
+.match-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:border-color .2s}
+.match-card.has-result{border-color:rgba(63,185,80,.3)}
+
+.match-meta{display:flex;justify-content:space-between;align-items:center;padding:8px 12px 0;font-size:.6rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;font-weight:600}
+.match-num{}
+.match-status-done{color:var(--green)}
+
+.match-body{display:grid;grid-template-columns:1fr 40px 1fr;align-items:center;padding:10px 8px 8px;gap:0}
+
+.team-btn{
+  display:flex;flex-direction:column;align-items:center;gap:5px;
+  padding:10px 6px 8px;border-radius:10px;cursor:pointer;
+  border:1.5px solid transparent;
+  background:none;color:inherit;
+  font-family:inherit;
+  transition:background .15s,border-color .15s,opacity .2s;
+  width:100%;
+}
+.team-btn:active{background:rgba(255,255,255,.04)}
+.team-btn.winner{background:var(--green-dim);border-color:rgba(63,185,80,.4)}
+.team-btn.loser{opacity:.32}
+
+.team-flag{font-size:2rem;line-height:1;margin-bottom:1px}
+.team-name{font-size:.72rem;font-weight:600;text-align:center;line-height:1.25;min-height:2em;display:flex;align-items:center;justify-content:center}
+.team-picks{display:flex;flex-wrap:wrap;gap:3px;justify-content:center;min-height:20px}
+.pick-chip{font-size:.55rem;font-weight:700;padding:2px 5px;border-radius:4px;letter-spacing:.03em;transition:opacity .2s}
+.pick-chip.wrong{opacity:.3;text-decoration:line-through}
+
+.vs-col{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;padding-top:4px}
+.vs-text{font-size:.65rem;font-weight:700;color:var(--muted)}
+.result-tick{font-size:.9rem;color:var(--green)}
+
+.match-footer{padding:0 12px 10px;text-align:center}
+.tap-hint{font-size:.6rem;color:var(--muted)}
+.result-row{display:flex;align-items:center;justify-content:center;gap:6px;font-size:.65rem;flex-wrap:wrap}
+.correct-list{color:var(--green);font-weight:600}
+.wrong-list{color:var(--muted)}
+.btn-clear{background:none;border:none;cursor:pointer;font-size:.6rem;color:var(--muted);text-decoration:underline;padding:0 2px;font-family:inherit}
+.btn-clear:hover{color:var(--red)}
+
+/* ── RESPONSIVE ─────────────────────────────── */
+@media(min-width:480px){
+  .match-body{padding:12px 12px 10px}
+  .team-flag{font-size:2.4rem}
+  .team-name{font-size:.8rem}
+}
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <a href="/apps/" class="back-link">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3L5 8l5 5"/></svg>
+    All apps
+  </a>
+  <h1><span class="ball">⚽</span> World Cup 2026 — Last 32</h1>
+  <p>Tap a team to record the winner · AH · DH · DT · LT · TH</p>
+  <div class="progress-wrap">
+    <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+    <div class="progress-labels">
+      <span id="progressText">0 of 16 results entered</span>
+      <span id="progressPct">0%</span>
+    </div>
+  </div>
+</header>
+
+<!-- LEADERBOARD -->
+<div class="lb-card">
+  <div class="lb-title">🏆 Leaderboard</div>
+  <div class="lb-rows" id="lbRows"></div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend" id="legend"></div>
+
+<!-- MATCHES -->
+<div class="section"><div class="section-title">Matches · Round of 32</div></div>
+<div class="matches" id="matches"></div>
+
+<script>
+const PLAYERS = ['AH','DH','DT','LT','TH'];
+
+// picks: 1 = team1, 2 = team2 (read from the handwritten prediction sheets)
+const MATCHES = [
+  { id:1,  t1:{n:'Morocco',       f:'🇲🇦'}, t2:{n:'Netherlands',   f:'🇳🇱'}, p:{AH:1,DH:2,DT:1,LT:1,TH:2} },
+  { id:2,  t1:{n:'Austria',       f:'🇦🇹'}, t2:{n:'Egypt',         f:'🇪🇬'}, p:{AH:2,DH:2,DT:2,LT:1,TH:1} },
+  { id:3,  t1:{n:'Paraguay',      f:'🇵🇾'}, t2:{n:'Germany',       f:'🇩🇪'}, p:{AH:1,DH:1,DT:1,LT:2,TH:1} },
+  { id:4,  t1:{n:'Sweden',        f:'🇸🇪'}, t2:{n:'France',        f:'🇫🇷'}, p:{AH:1,DH:2,DT:1,LT:1,TH:1} },
+  { id:5,  t1:{n:'Belgium',       f:'🇧🇪'}, t2:{n:'Senegal',       f:'🇸🇳'}, p:{AH:1,DH:1,DT:2,LT:1,TH:1} },
+  { id:6,  t1:{n:'Norway',        f:'🇳🇴'}, t2:{n:'Ivory Coast',   f:'🇨🇮'}, p:{AH:1,DH:2,DT:2,LT:1,TH:2} },
+  { id:7,  t1:{n:'Argentina',     f:'🇦🇷'}, t2:{n:'Cape Verde',    f:'🇨🇻'}, p:{AH:2,DH:1,DT:1,LT:2,TH:1} },
+  { id:8,  t1:{n:'Austria',       f:'🇦🇹'}, t2:{n:'Spain',         f:'🇪🇸'}, p:{AH:1,DH:2,DT:2,LT:2,TH:2} },
+  { id:9,  t1:{n:'Algeria',       f:'🇩🇿'}, t2:{n:'Switzerland',   f:'🇨🇭'}, p:{AH:1,DH:2,DT:2,LT:2,TH:2} },
+  { id:10, t1:{n:'Colombia',      f:'🇨🇴'}, t2:{n:'Ghana',         f:'🇬🇭'}, p:{AH:2,DH:1,DT:2,LT:2,TH:1} },
+  { id:11, t1:{n:'Portugal',      f:'🇵🇹'}, t2:{n:'Croatia',       f:'🇭🇷'}, p:{AH:1,DH:1,DT:1,LT:2,TH:1} },
+  { id:12, t1:{n:'DR Congo',      f:'🇨🇩'}, t2:{n:'England',       f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿'}, p:{AH:2,DH:2,DT:2,LT:1,TH:2} },
+  { id:13, t1:{n:'Mexico',        f:'🇲🇽'}, t2:{n:'Ecuador',       f:'🇪🇨'}, p:{AH:1,DH:1,DT:2,LT:1,TH:1} },
+  { id:14, t1:{n:'South Africa',  f:'🇿🇦'}, t2:{n:'Canada',        f:'🇨🇦'}, p:{AH:1,DH:2,DT:2,LT:2,TH:1} },
+  { id:15, t1:{n:'Bosnia & Herz.',f:'🇧🇦'}, t2:{n:'USA',           f:'🇺🇸'}, p:{AH:1,DH:2,DT:2,LT:2,TH:1} },
+  { id:16, t1:{n:'Brazil',        f:'🇧🇷'}, t2:{n:'Japan',         f:'🇯🇵'}, p:{AH:1,DH:2,DT:2,LT:1,TH:1} },
+];
+
+const PLAYER_COLORS = {AH:'ah',DH:'dh',DT:'dt',LT:'lt',TH:'th'};
+const PLAYER_FILL   = {AH:'#ef4444',DH:'#3b82f6',DT:'#22c55e',LT:'#a855f7',TH:'#f59e0b'};
+const RANK_EMOJI    = ['🥇','🥈','🥉'];
+
+let results = {};
+try{ results = JSON.parse(localStorage.getItem('wc26_results') || '{}'); }catch(e){}
+
+function save(){ try{localStorage.setItem('wc26_results',JSON.stringify(results));}catch(e){} }
+
+function scores(){
+  const s={}, pending={};
+  PLAYERS.forEach(p=>{s[p]=0;pending[p]=0;});
+  MATCHES.forEach(m=>{
+    const r = results[m.id];
+    PLAYERS.forEach(p=>{
+      if(r != null){ if(m.p[p]===r) s[p]++; }
+      else{ pending[p]++; }
+    });
+  });
+  return {s, pending};
+}
+
+function renderLegend(){
+  const el = document.getElementById('legend');
+  el.innerHTML = PLAYERS.map(p=>
+    `<div class="legend-item">
+      <span class="chip c-${PLAYER_COLORS[p]}">${p}</span>
+    </div>`
+  ).join('');
+}
+
+function renderLeaderboard(){
+  const {s, pending} = scores();
+  const sorted = PLAYERS.map(p=>({p,score:s[p],pending:pending[p]}))
+    .sort((a,b)=>b.score-a.score||a.p.localeCompare(b.p));
+  const maxPossible = 16;
+
+  document.getElementById('lbRows').innerHTML = sorted.map((item,i)=>{
+    const pct = Math.round(item.score/maxPossible*100);
+    const rankCls = i<3?`p${i+1}`:'';
+    const rank = i<3?RANK_EMOJI[i]:`${i+1}.`;
+    return `<div class="lb-row">
+      <div class="lb-pos ${rankCls}">${rank}</div>
+      <div class="lb-badge chip c-${PLAYER_COLORS[item.p]}">${item.p}</div>
+      <div class="lb-bar-bg">
+        <div class="lb-bar-fill fill-${PLAYER_COLORS[item.p]}" style="width:${pct}%">
+          ${item.score>0?`<span>${item.score}</span>`:''}
+        </div>
+      </div>
+      <div class="lb-pts">${item.score}</div>
+      <div class="lb-max">${item.pending>0?`+${item.pending}?`:''}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderMatches(){
+  const el = document.getElementById('matches');
+  el.innerHTML = MATCHES.map(m=>{
+    const r = results[m.id];
+    const hasResult = r != null;
+    const t1Picks = PLAYERS.filter(p=>m.p[p]===1);
+    const t2Picks = PLAYERS.filter(p=>m.p[p]===2);
+    const correctPickers = hasResult ? PLAYERS.filter(p=>m.p[p]===r) : [];
+    const wrongPickers   = hasResult ? PLAYERS.filter(p=>m.p[p]!==r) : [];
+
+    function chips(picks){
+      return picks.map(p=>{
+        const wrong = hasResult && m.p[p]!==r;
+        return `<span class="pick-chip c-${PLAYER_COLORS[p]}${wrong?' wrong':''}">${p}</span>`;
+      }).join('');
+    }
+
+    const t1Cls = hasResult ? (r===1?'winner':'loser') : '';
+    const t2Cls = hasResult ? (r===2?'winner':'loser') : '';
+    const winnerName = hasResult ? (r===1?m.t1.n:m.t2.n) : '';
+
+    return `<div class="match-card${hasResult?' has-result':''}" id="mc${m.id}">
+      <div class="match-meta">
+        <span class="match-num">Match ${m.id}</span>
+        <span class="${hasResult?'match-status-done':''}">${hasResult?`✓ ${winnerName}`:'no result'}</span>
+      </div>
+      <div class="match-body">
+        <button class="team-btn ${t1Cls}" onclick="setResult(${m.id},1)" aria-label="${m.t1.n}">
+          <div class="team-flag">${m.t1.f}</div>
+          <div class="team-name">${m.t1.n}</div>
+          <div class="team-picks">${chips(t1Picks)}</div>
+        </button>
+        <div class="vs-col">
+          <div class="vs-text">VS</div>
+          ${hasResult?`<div class="result-tick">✓</div>`:''}
+        </div>
+        <button class="team-btn ${t2Cls}" onclick="setResult(${m.id},2)" aria-label="${m.t2.n}">
+          <div class="team-flag">${m.t2.f}</div>
+          <div class="team-name">${m.t2.n}</div>
+          <div class="team-picks">${chips(t2Picks)}</div>
+        </button>
+      </div>
+      <div class="match-footer">
+        ${hasResult
+          ? `<div class="result-row">
+              <span class="correct-list">✅ ${correctPickers.join(' · ')}</span>
+              <span>·</span>
+              <span class="wrong-list">❌ ${wrongPickers.join(' · ')}</span>
+              <span>·</span>
+              <button class="btn-clear" onclick="clearResult(${m.id})">clear</button>
+            </div>`
+          : `<div class="tap-hint">tap a team to set the winner</div>`
+        }
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateProgress(){
+  const done = Object.keys(results).length;
+  const total = MATCHES.length;
+  const pct = Math.round(done/total*100);
+  document.getElementById('progressFill').style.width = pct+'%';
+  document.getElementById('progressText').textContent = `${done} of ${total} results entered`;
+  document.getElementById('progressPct').textContent = pct+'%';
+}
+
+function setResult(id, winner){
+  results[id] = winner;
+  save();
+  render();
+}
+
+function clearResult(id){
+  delete results[id];
+  save();
+  render();
+}
+
+function render(){
+  renderLeaderboard();
+  renderMatches();
+  updateProgress();
+}
+
+renderLegend();
+render();
+</script>
+</body>
+</html>
