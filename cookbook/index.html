@@ -11,8 +11,12 @@
 
 /* ── Reset ───────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { -webkit-text-size-adjust: 100%; height: 100%; }
-body { font-family: 'Caveat', cursive; background: #1c3540; min-height: 100dvh; }
+html { -webkit-text-size-adjust: 100%; height: 100%; overscroll-behavior: none; }
+body {
+  font-family: 'Caveat', cursive; background: #1c3540; min-height: 100dvh;
+  overflow: hidden; overscroll-behavior: none;
+}
+body.is-open { overflow: visible; }
 button { font-family: inherit; cursor: pointer; border: none; background: none; }
 input, textarea, select { font-family: inherit; }
 a { text-decoration: none; color: inherit; }
@@ -22,6 +26,7 @@ a { text-decoration: none; color: inherit; }
   position: fixed; inset: 0; z-index: 100;
   display: flex; align-items: flex-end; justify-content: flex-start;
   padding: 44px 34px 50px;
+  background: #165060;
   transition: opacity 0.7s ease;
 }
 #cover.out { opacity: 0; pointer-events: none; }
@@ -242,11 +247,19 @@ a { text-decoration: none; color: inherit; }
   padding-bottom: 1px; line-height: 36px;
 }
 
-/* Body text — 36 px line-height matches the ruled grid */
+/* Body text — 36 px line-height matches the ruled grid.
+   The ruled line is drawn as a background local to this element (rather
+   than relying on the page-wide grid) so it always lines up with this
+   block's own text baselines, regardless of what sits above it. */
 .recipe-body {
   font-size: 22px; line-height: 36px;
   color: #2a1e14; white-space: pre-wrap;
   display: block; margin-top: 0;
+  background-color: #f7f3e5;
+  background-image: repeating-linear-gradient(
+    transparent 0px, transparent 35px,
+    rgba(110,130,200,0.17) 35px, rgba(110,130,200,0.17) 36px
+  );
 }
 
 /* ── Add / Edit form ─────────────────────────────────── */
@@ -570,13 +583,23 @@ function setLang(l) {
   document.getElementById('main').innerHTML = pageRecipe();
 }
 
-function nav(p, c, r) {
+function nav(p, c, r, replace) {
   page = p;
   if (c !== undefined) catId    = c;
   if (r !== undefined) recipeId = r;
+  const state = { page, catId, recipeId };
+  if (replace) history.replaceState(state, '');
+  else history.pushState(state, '');
   render();
   window.scrollTo(0, 0);
 }
+
+window.addEventListener('popstate', e => {
+  const s = e.state || { page: 'home', catId: null, recipeId: null };
+  page = s.page; catId = s.catId; recipeId = s.recipeId;
+  render();
+  window.scrollTo(0, 0);
+});
 
 /* ── HTML helpers ────────────────────────────────────── */
 function esc(s)  { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
@@ -756,13 +779,13 @@ function saveRecipe(editId) {
   }
 
   dbSave(rows);
-  nav('recipe', payload.cat, payload.id);
+  nav('recipe', payload.cat, payload.id, true);
 }
 
 function deleteRecipe(id) {
   if (!confirm('Obrisati recept?')) return;
   dbSave(db().filter(r => r.id !== id));
-  nav('home');
+  nav('home', undefined, undefined, true);
 }
 
 /* ── Render ──────────────────────────────────────────── */
@@ -772,7 +795,7 @@ function render() {
   const titleEl   = document.getElementById('hdr-title');
   const actionBtn = document.getElementById('hdr-action');
 
-  backBtn.style.display   = page === 'home' ? 'none' : '';
+  backBtn.style.display   = page === 'home' ? 'none' : 'block';
   actionBtn.style.display = 'none';
   actionBtn.onclick = null;
 
@@ -787,7 +810,7 @@ function render() {
       const cat = CATS.find(c => c.id === catId);
       titleEl.textContent = cat ? cat.hr : '';
       actionBtn.textContent    = '+';
-      actionBtn.style.display  = '';
+      actionBtn.style.display  = 'block';
       actionBtn.style.fontSize = '26px';
       actionBtn.onclick = () => nav('add');
       main.innerHTML = pageCategory();
@@ -798,9 +821,9 @@ function render() {
       const r = db().find(x => x.id === recipeId);
       titleEl.textContent      = r ? r.nameHr : 'Recept';
       actionBtn.textContent    = 'Uredi';
-      actionBtn.style.display  = '';
+      actionBtn.style.display  = 'block';
       actionBtn.style.fontSize = '17px';
-      actionBtn.onclick = () => nav('edit', catId, recipeId);
+      actionBtn.onclick = () => nav('edit', catId, recipeId, true);
       main.innerHTML = pageRecipe();
       break;
     }
@@ -819,12 +842,15 @@ function render() {
 
 /* ── Event listeners ─────────────────────────────────── */
 document.getElementById('back-btn').addEventListener('click', () => {
-  if (page === 'edit') nav('recipe', catId, recipeId);
-  else nav('home');
+  if (page === 'edit')            nav('recipe', catId, recipeId, true);
+  else if (page === 'recipe')     nav('category', catId);
+  else if (page === 'add')        nav('category', catId);
+  else                            nav('home');
 });
 
 function openApp() {
   document.getElementById('cover').classList.add('out');
+  document.body.classList.add('is-open');
   setTimeout(() => { document.getElementById('cover').style.display = 'none'; }, 700);
 }
 document.getElementById('cover-open-btn').addEventListener('click', openApp);
@@ -834,6 +860,7 @@ document.getElementById('cover').addEventListener('click', e => {
 });
 
 /* ── Boot ────────────────────────────────────────────── */
+history.replaceState({ page: 'home', catId: null, recipeId: null }, '');
 seedDefaults();
 render();
 
