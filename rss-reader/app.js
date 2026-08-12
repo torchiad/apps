@@ -1,6 +1,6 @@
 const DEFAULT_FEED = 'https://www.swindonadvertiser.co.uk/news/rss/';
 const STORAGE_KEY = 'broadsheet.lastUrl';
-const FETCH_TIMEOUT_MS = 12000;
+const FETCH_TIMEOUT_MS = 9000;
 
 const feedForm = document.getElementById('feedForm');
 const feedUrlInput = document.getElementById('feedUrl');
@@ -57,12 +57,20 @@ async function fetchWithTimeout(url, opts = {}) {
     }
 }
 
-// Try a URL directly, then fall back to public CORS relays. Used for both
-// the feed XML and (when reading full articles) the source page's HTML.
+// Try a URL directly, then fall back through several public CORS relays.
+// Used for both the feed XML and (when reading full articles) the source
+// page's HTML. Some publishers' bot protection blocks individual relays'
+// IP ranges, so more relays means more chances one gets through.
 async function fetchTextViaProxies(targetUrl) {
     const attempts = [
         () => fetchWithTimeout(targetUrl).then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
         () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`)
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+        () => fetchWithTimeout(`https://corsproxy.io/?url=${encodeURIComponent(targetUrl)}`)
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+        () => fetchWithTimeout(`https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`)
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+        () => fetchWithTimeout(`https://thingproxy.freeboard.io/fetch/${targetUrl}`)
             .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
         () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`)
             .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
