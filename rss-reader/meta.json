@@ -1,0 +1,8 @@
+{
+    "name": "Broadsheet",
+    "category": "Tool",
+    "blurb": "Paste any RSS link and read it as clean, formatted articles. Loads Swindon Advertiser news by default.",
+    "hue": 18,
+    "pattern": "stripes",
+    "date": "2026-08-12"
+}

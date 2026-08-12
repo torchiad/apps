@@ -130,6 +130,17 @@ const PROJECTS = [
         "category": "App",
         "blurb": "A personal recipe book with Croatian and English — lined notepad style.",
         "date": "2026-06-21"
+    },
+    {
+        "slug": "rss-reader",
+        "path": "/apps/rss-reader/",
+        "uses": 0,
+        "hue": 18,
+        "pattern": "stripes",
+        "name": "Broadsheet",
+        "category": "Tool",
+        "blurb": "Paste any RSS link and read it as clean, formatted articles. Loads Swindon Advertiser news by default.",
+        "date": "2026-08-12"
     }
 ];
 

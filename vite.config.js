@@ -10,6 +10,7 @@ const input = {
     shoreline: path.resolve(__dirname, 'shoreline/index.html'),
     hose_planner: path.resolve(__dirname, 'hose-planner/index.html'),
     cookbook: path.resolve(__dirname, 'cookbook/index.html'),
+    rss_reader: path.resolve(__dirname, 'rss-reader/index.html'),
 };
 
 export default defineConfig({
