@@ -12,12 +12,38 @@ const feedSubEl = document.getElementById('feedSub');
 const articlesEl = document.getElementById('articles');
 const presetsEl = document.getElementById('presets');
 
+const readerOverlay = document.getElementById('readerOverlay');
+const readerClose = document.getElementById('readerClose');
+const readerKicker = document.getElementById('readerKicker');
+const readerTitle = document.getElementById('readerTitle');
+const readerMeta = document.getElementById('readerMeta');
+const readerBody = document.getElementById('readerBody');
+const readerSource = document.getElementById('readerSource');
+
+let currentFeedTitle = '';
+
 function isHttpUrl(str) {
     try {
         const u = new URL(str);
         return u.protocol === 'http:' || u.protocol === 'https:';
     } catch {
         return false;
+    }
+}
+
+function absolutize(url, base) {
+    try {
+        return new URL(url, base).href;
+    } catch {
+        return null;
+    }
+}
+
+function hostnameOf(url) {
+    try {
+        return new URL(url).hostname.replace(/^www\./, '');
+    } catch {
+        return url;
     }
 }
 
@@ -31,13 +57,14 @@ async function fetchWithTimeout(url, opts = {}) {
     }
 }
 
-// Try the feed directly, then fall back to public CORS relays.
-async function fetchFeedText(feedUrl) {
+// Try a URL directly, then fall back to public CORS relays. Used for both
+// the feed XML and (when reading full articles) the source page's HTML.
+async function fetchTextViaProxies(targetUrl) {
     const attempts = [
-        () => fetchWithTimeout(feedUrl).then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
-        () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(feedUrl)}`)
+        () => fetchWithTimeout(targetUrl).then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
+        () => fetchWithTimeout(`https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`)
             .then(r => (r.ok ? r.text() : Promise.reject(new Error(`HTTP ${r.status}`)))),
-        () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(feedUrl)}`)
+        () => fetchWithTimeout(`https://api.allorigins.win/get?url=${encodeURIComponent(targetUrl)}`)
             .then(r => (r.ok ? r.json() : Promise.reject(new Error(`HTTP ${r.status}`))))
             .then(j => j.contents),
     ];
@@ -51,7 +78,7 @@ async function fetchFeedText(feedUrl) {
             lastErr = err;
         }
     }
-    throw lastErr || new Error('Could not fetch that feed');
+    throw lastErr || new Error('Could not fetch that URL');
 }
 
 function firstChildText(el, tagNames) {
@@ -147,6 +174,200 @@ function formatDate(d) {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+// ---- Full-article extraction ----
+// News feeds almost always ship a short teaser only. To show the full piece
+// we fetch the source page and pull out its main content with a lightweight
+// readability-style heuristic, then rebuild it through a strict tag/attribute
+// allowlist so nothing from the (untrusted, third-party) page can execute.
+
+const CONTENT_TAGS = new Set([
+    'P', 'BR', 'STRONG', 'B', 'EM', 'I', 'U', 'A', 'IMG', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6',
+    'UL', 'OL', 'LI', 'BLOCKQUOTE', 'FIGURE', 'FIGCAPTION', 'PRE', 'CODE', 'SPAN', 'DIV',
+    'SECTION', 'ARTICLE', 'TABLE', 'THEAD', 'TBODY', 'TR', 'TD', 'TH', 'HR', 'SUB', 'SUP', 'MARK',
+]);
+
+const STRIP_SELECTOR = [
+    'script', 'style', 'noscript', 'iframe', 'svg', 'form', 'nav', 'header', 'footer', 'aside',
+    'button', 'input', 'select', 'textarea', '[aria-hidden="true"]',
+    '[class*="advert"]', '[id*="advert"]', '[class*="cookie"]', '[id*="cookie"]',
+    '[class*="newsletter"]', '[class*="social-share"]', '[class*="related-article"]', '[class*="comments"]',
+].join(',');
+
+function sanitizeToFragment(html, baseUrl) {
+    const doc = new DOMParser().parseFromString(html, 'text/html');
+    const frag = document.createDocumentFragment();
+    walkSanitize(doc.body, frag, baseUrl);
+    return frag;
+}
+
+function walkSanitize(src, destParent, baseUrl) {
+    for (const child of Array.from(src.childNodes)) {
+        if (child.nodeType === Node.TEXT_NODE) {
+            if (child.textContent) destParent.appendChild(document.createTextNode(child.textContent));
+            continue;
+        }
+        if (child.nodeType !== Node.ELEMENT_NODE) continue;
+        const tag = child.tagName;
+        if (!CONTENT_TAGS.has(tag)) continue; // drop scripts, nav, styles, unknown tags entirely
+
+        if (tag === 'IMG') {
+            const rawSrc = child.getAttribute('src') || child.getAttribute('data-src') || '';
+            const abs = rawSrc ? absolutize(rawSrc, baseUrl) : null;
+            if (!abs || !isHttpUrl(abs)) continue;
+            const img = document.createElement('img');
+            img.src = abs;
+            const alt = child.getAttribute('alt');
+            if (alt) img.alt = alt;
+            img.loading = 'lazy';
+            img.referrerPolicy = 'no-referrer';
+            destParent.appendChild(img);
+            continue;
+        }
+
+        const el = document.createElement(tag.toLowerCase());
+        if (tag === 'A') {
+            const rawHref = child.getAttribute('href') || '';
+            const abs = rawHref ? absolutize(rawHref, baseUrl) : null;
+            if (abs && isHttpUrl(abs)) {
+                el.href = abs;
+                el.target = '_blank';
+                el.rel = 'noopener noreferrer nofollow';
+            }
+        }
+        walkSanitize(child, el, baseUrl);
+        destParent.appendChild(el);
+    }
+}
+
+function scoreCandidate(el) {
+    const paras = el.querySelectorAll('p');
+    let textLen = 0;
+    paras.forEach(p => { textLen += p.textContent.trim().length; });
+    if (!textLen) return 0;
+    let linkLen = 0;
+    el.querySelectorAll('a').forEach(a => { linkLen += a.textContent.trim().length; });
+    const density = textLen ? linkLen / textLen : 1;
+    return textLen * (1 - Math.min(density, 0.85));
+}
+
+const CANDIDATE_SELECTORS = [
+    'article', '[itemprop="articleBody"]', 'main', '[role="main"]',
+    '.article-body', '.article__body', '.story-body', '.entry-content', '.post-content', '.c-article-body',
+];
+
+function extractArticle(htmlText, pageUrl) {
+    const doc = new DOMParser().parseFromString(htmlText, 'text/html');
+    doc.querySelectorAll(STRIP_SELECTOR).forEach(n => n.remove());
+
+    let best = null, bestScore = 0;
+    for (const sel of CANDIDATE_SELECTORS) {
+        doc.querySelectorAll(sel).forEach(el => {
+            const s = scoreCandidate(el);
+            if (s > bestScore) { bestScore = s; best = el; }
+        });
+    }
+    if (!best) {
+        doc.querySelectorAll('div, section').forEach(el => {
+            if (el.querySelectorAll(':scope > p').length < 2 && el.querySelectorAll('p').length < 3) return;
+            const s = scoreCandidate(el);
+            if (s > bestScore) { bestScore = s; best = el; }
+        });
+    }
+    if (!best || bestScore < 200) return null;
+
+    return { fragment: sanitizeToFragment(best.innerHTML, pageUrl) };
+}
+
+function normalizeText(s) {
+    return s.trim().toLowerCase().replace(/\s+/g, ' ');
+}
+
+// The extracted content usually repeats the headline as its own <h1>/<h2>;
+// drop it since the reader overlay already shows the title separately.
+function dedupeLeadingHeading(fragment, title) {
+    const first = fragment.firstElementChild;
+    if (first && /^H[1-3]$/.test(first.tagName) && normalizeText(first.textContent) === normalizeText(title)) {
+        fragment.removeChild(first);
+    }
+}
+
+function skeletonReader() {
+    const el = document.createElement('div');
+    el.className = 'reader-skel';
+    [92, 88, 95, 70, 90, 60].forEach(w => {
+        const line = document.createElement('div');
+        line.style.width = w + '%';
+        el.appendChild(line);
+    });
+    return el;
+}
+
+function showReaderFallback(item, message) {
+    readerBody.innerHTML = '';
+    const note = document.createElement('p');
+    note.className = 'reader-note';
+    note.textContent = message;
+    readerBody.appendChild(note);
+    if (item.excerpt) {
+        const p = document.createElement('p');
+        p.textContent = item.excerpt;
+        readerBody.appendChild(p);
+    }
+}
+
+async function openReader(item) {
+    readerOverlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    readerKicker.textContent = currentFeedTitle;
+    readerTitle.textContent = item.title;
+
+    const metaBits = [];
+    if (item.author) metaBits.push(item.author);
+    if (item.date) metaBits.push(formatDate(item.date));
+    readerMeta.textContent = metaBits.join(' · ');
+
+    readerBody.innerHTML = '';
+    readerBody.appendChild(skeletonReader());
+
+    readerSource.innerHTML = '';
+    if (item.link && isHttpUrl(item.link)) {
+        const a = document.createElement('a');
+        a.href = item.link;
+        a.target = '_blank';
+        a.rel = 'noopener noreferrer';
+        a.textContent = `Open original at ${hostnameOf(item.link)} ↗`;
+        readerSource.appendChild(a);
+    }
+
+    if (!item.link || !isHttpUrl(item.link)) {
+        showReaderFallback(item, 'This feed did not provide a link to the full article.');
+        return;
+    }
+
+    try {
+        const html = await fetchTextViaProxies(item.link);
+        const extracted = extractArticle(html, item.link);
+        if (!extracted) throw new Error('extraction-failed');
+        dedupeLeadingHeading(extracted.fragment, item.title);
+        readerBody.innerHTML = '';
+        readerBody.appendChild(extracted.fragment);
+    } catch {
+        showReaderFallback(item, "Couldn't pull the full article automatically — here's the feed summary instead.");
+    }
+}
+
+function closeReader() {
+    readerOverlay.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+readerClose.addEventListener('click', closeReader);
+readerOverlay.addEventListener('click', e => { if (e.target === readerOverlay) closeReader(); });
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && readerOverlay.classList.contains('open')) closeReader();
+});
+
 function showStatus(message, isError, retryUrl) {
     statusEl.hidden = false;
     statusEl.className = 'status' + (isError ? ' error' : '');
@@ -175,16 +396,24 @@ function skeletonCard() {
     return el;
 }
 
+function placeholder(title) {
+    const ph = document.createElement('div');
+    ph.className = 'ph';
+    const span = document.createElement('span');
+    span.textContent = (title || '?').trim().charAt(0).toUpperCase();
+    ph.appendChild(span);
+    return ph;
+}
+
 function renderArticle(item) {
-    const card = document.createElement('a');
+    const card = document.createElement('div');
     card.className = 'card';
-    if (item.link && isHttpUrl(item.link)) {
-        card.href = item.link;
-        card.target = '_blank';
-        card.rel = 'noopener noreferrer';
-    } else {
-        card.href = '#';
-    }
+    card.setAttribute('role', 'button');
+    card.tabIndex = 0;
+    card.addEventListener('click', () => openReader(item));
+    card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openReader(item); }
+    });
 
     const thumb = document.createElement('div');
     thumb.className = 'thumb';
@@ -211,10 +440,21 @@ function renderArticle(item) {
     const metaBits = [];
     if (item.author) metaBits.push(item.author);
     if (item.date) metaBits.push(formatDate(item.date));
-    meta.textContent = metaBits.join(' · ');
+    if (metaBits.length) meta.appendChild(document.createTextNode(metaBits.join(' · ')));
+    if (item.link && isHttpUrl(item.link)) {
+        if (metaBits.length) meta.appendChild(document.createTextNode(' · '));
+        const src = document.createElement('a');
+        src.className = 'src-link';
+        src.href = item.link;
+        src.target = '_blank';
+        src.rel = 'noopener noreferrer';
+        src.textContent = 'source ↗';
+        src.addEventListener('click', e => e.stopPropagation());
+        meta.appendChild(src);
+    }
 
     body.appendChild(h3);
-    if (metaBits.length) body.appendChild(meta);
+    if (meta.childNodes.length) body.appendChild(meta);
 
     if (item.excerpt) {
         const excerpt = document.createElement('div');
@@ -225,21 +465,12 @@ function renderArticle(item) {
 
     const go = document.createElement('span');
     go.className = 'go';
-    go.textContent = 'Read full article →';
+    go.textContent = 'Read full article';
     body.appendChild(go);
 
     card.appendChild(thumb);
     card.appendChild(body);
     return card;
-}
-
-function placeholder(title) {
-    const ph = document.createElement('div');
-    ph.className = 'ph';
-    const span = document.createElement('span');
-    span.textContent = (title || '?').trim().charAt(0).toUpperCase();
-    ph.appendChild(span);
-    return ph;
 }
 
 function updatePresetActive(url) {
@@ -264,11 +495,12 @@ async function loadFeed(url) {
     for (let i = 0; i < 3; i++) articlesEl.appendChild(skeletonCard());
 
     try {
-        const xmlText = await fetchFeedText(url);
+        const xmlText = await fetchTextViaProxies(url);
         const feed = parseFeed(xmlText);
 
         articlesEl.innerHTML = '';
-        feedTitleEl.textContent = feed.title || 'Feed';
+        currentFeedTitle = feed.title || 'Feed';
+        feedTitleEl.textContent = currentFeedTitle;
         feedSubEl.textContent = `${feed.items.length} article${feed.items.length === 1 ? '' : 's'} · updated just now`;
         feedMetaEl.hidden = false;
 
