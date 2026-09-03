@@ -2,6 +2,8 @@ import * as L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import SunCalc from 'suncalc';
 
+const $ = id => document.getElementById(id);
+
 // ---------- constants & small helpers ----------
 const D2R = Math.PI / 180, R2D = 180 / Math.PI;
 const norm360 = x => ((x % 360) + 360) % 360;
@@ -106,16 +108,67 @@ function skyColor(altDeg) {
 }
 
 // ---------- state ----------
-const state = { lat: 51.5074, lon: -0.1278, playing: false, playTimer: null };
+const state = { lat: 51.5074, lon: -0.1278, playing: false, playTimer: null, sunAltRad: 0, shadowBearingDeg: 0 };
+
+function debounce(fn, ms) {
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+
+// convex hull (monotone chain) over [x,y] points
+function convexHull(pts) {
+  const points = pts.slice().sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+  if (points.length <= 2) return points;
+  const cross = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower = [];
+  for (const p of points) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], p) <= 0) lower.pop();
+    lower.push(p);
+  }
+  const upper = [];
+  for (let i = points.length - 1; i >= 0; i--) {
+    const p = points[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], p) <= 0) upper.pop();
+    upper.push(p);
+  }
+  upper.pop(); lower.pop();
+  return lower.concat(upper);
+}
+
+// shadow a building casts: sweep its footprint along the shadow vector, take the hull
+function buildingShadowPolygon(footprint, shadowBearingDeg, shadowLenM) {
+  if (!(shadowLenM > 0) || !isFinite(shadowLenM)) return null;
+  const translated = footprint.map(([lat, lon]) => destinationPoint(lat, lon, shadowBearingDeg, shadowLenM));
+  const combined = footprint.concat(translated).map(([lat, lon]) => [lon, lat]);
+  const hull = convexHull(combined);
+  if (hull.length < 3) return null;
+  return hull.map(([lon, lat]) => [lat, lon]);
+}
+
+function buildingHeight(tags) {
+  const h = parseFloat(tags.height ?? tags['building:height']);
+  if (!isNaN(h)) return h;
+  const levels = parseFloat(tags['building:levels'] ?? tags.levels);
+  if (!isNaN(levels)) return levels * 3 + 1;
+  return Number(assumedHeightInput.value) || 6;
+}
 
 // ---------- map setup ----------
-const map = L.map('map', { worldCopyJump: true }).setView([state.lat, state.lon], 5);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+const map = L.map('map', { worldCopyJump: true }).setView([state.lat, state.lon], 17);
+
+const streetLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   attribution: '&copy; OpenStreetMap contributors',
-  maxZoom: 18,
+  maxZoom: 19,
+});
+const satelliteLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  attribution: 'Tiles &copy; Esri — Source: Esri, Maxar, Earthstar Geographics, and the GIS User Community',
+  maxZoom: 19,
 }).addTo(map);
+L.control.layers({ Satellite: satelliteLayer, Streets: streetLayer }, null, { position: 'topright' }).addTo(map);
 
 const nightLayer = L.polygon([], { stroke: false, fillColor: '#10142b', fillOpacity: 0.38, interactive: false }).addTo(map);
+const buildingsLayer = L.layerGroup().addTo(map);
+const shadowsLayer = L.layerGroup().addTo(map);
 
 const pinIcon = L.divIcon({ className: '', html: '<div class="gnomon-pin"></div>', iconSize: [18, 18], iconAnchor: [9, 9] });
 const marker = L.marker([state.lat, state.lon], { icon: pinIcon, draggable: true }).addTo(map);
@@ -134,8 +187,79 @@ map.on('click', e => {
   update();
 });
 
+// ---------- real building shadows (OpenStreetMap footprints via Overpass) ----------
+const buildingStatus = $('building-status');
+const assumedHeightInput = $('assumed-height');
+let buildingsData = [];
+let lastBuildingsKey = null;
+let buildingsAbort = null;
+
+function drawBuildingFootprints() {
+  buildingsLayer.clearLayers();
+  for (const b of buildingsData) {
+    L.polygon(b.footprint, { color: '#ffd158', weight: 1.2, opacity: 0.9, fill: false, interactive: false }).addTo(buildingsLayer);
+  }
+}
+
+function renderBuildingShadows() {
+  shadowsLayer.clearLayers();
+  if (state.sunAltRad <= 0) return;
+  for (const b of buildingsData) {
+    const h = buildingHeight(b.tags);
+    const len = h / Math.tan(state.sunAltRad);
+    const poly = buildingShadowPolygon(b.footprint, state.shadowBearingDeg, len);
+    if (poly) L.polygon(poly, { stroke: false, fillColor: '#000', fillOpacity: 0.42, interactive: false }).addTo(shadowsLayer);
+  }
+}
+
+async function loadBuildingsForView() {
+  const zoom = map.getZoom();
+  if (zoom < 16) {
+    buildingsData = [];
+    lastBuildingsKey = null;
+    buildingsLayer.clearLayers();
+    shadowsLayer.clearLayers();
+    buildingStatus.textContent = 'Zoom in to street level to see building shadows';
+    return;
+  }
+  const b = map.getBounds();
+  const south = b.getSouth(), west = b.getWest(), north = b.getNorth(), east = b.getEast();
+  if ((north - south) * (east - west) > 0.01) {
+    buildingStatus.textContent = 'Zoom in further to load buildings';
+    return;
+  }
+  const key = [south, west, north, east].map(n => n.toFixed(5)).join(',');
+  if (key === lastBuildingsKey) return;
+  lastBuildingsKey = key;
+
+  if (buildingsAbort) buildingsAbort.abort();
+  buildingsAbort = new AbortController();
+  buildingStatus.textContent = 'Loading buildings…';
+  try {
+    const query = `[out:json][timeout:15];way["building"](${south},${west},${north},${east});out geom;`;
+    const res = await fetch('https://overpass-api.de/api/interpreter', {
+      method: 'POST',
+      body: 'data=' + encodeURIComponent(query),
+      signal: buildingsAbort.signal,
+    });
+    if (!res.ok) throw new Error('bad response');
+    const json = await res.json();
+    buildingsData = (json.elements || [])
+      .filter(el => el.type === 'way' && el.geometry && el.geometry.length >= 3)
+      .map(el => ({ id: el.id, footprint: el.geometry.map(pt => [pt.lat, pt.lon]), tags: el.tags || {} }));
+    buildingStatus.textContent = `${buildingsData.length} building${buildingsData.length === 1 ? '' : 's'} loaded`;
+    drawBuildingFootprints();
+    renderBuildingShadows();
+  } catch (e) {
+    if (e.name === 'AbortError') return;
+    buildingStatus.textContent = 'Could not load buildings — try panning again';
+  }
+}
+
+map.on('moveend', debounce(loadBuildingsForView, 600));
+assumedHeightInput.addEventListener('input', renderBuildingShadows);
+
 // ---------- controls ----------
-const $ = id => document.getElementById(id);
 const dateInput = $('date'), timeSlider = $('time'), timeOut = $('time-out'), coordsEl = $('coords');
 
 function todayISO() {
@@ -293,6 +417,9 @@ function update() {
   const shadowBearingDeg = norm360(pos.azimuth * R2D);
   const isDay = altDeg > 0;
   const shadowLenM = isDay ? POLE_HEIGHT_M / Math.tan(pos.altitude) : Infinity;
+  state.sunAltRad = pos.altitude;
+  state.shadowBearingDeg = shadowBearingDeg;
+  renderBuildingShadows();
 
   $('ro-alt').textContent = `${altDeg.toFixed(1)}°${isDay ? '' : ' (below horizon)'}`;
   $('ro-az').textContent = `${sunBearingDeg.toFixed(0)}° ${compassLabel(sunBearingDeg)}`;
@@ -326,3 +453,4 @@ function update() {
 }
 
 update();
+loadBuildingsForView();

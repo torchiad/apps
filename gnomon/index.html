@@ -13,7 +13,7 @@
   <header>
     <div class="kicker">Gnomon</div>
     <h1>Where the <em>shadows</em> fall</h1>
-    <p class="standfirst">Drop a pin anywhere on Earth, scrub through the day, and see the sun's position, the day/night line, and how long a shadow would fall — at any time, any date.</p>
+    <p class="standfirst">Zoom in on a real building, scrub through the day, and watch the actual shadow it casts move across the map — plus the sun's position, the day/night line, and shadow length, at any time, any date.</p>
   </header>
 
   <div class="search-row">
@@ -31,6 +31,13 @@
 
   <div class="layout">
     <div class="panel map-panel">
+      <div class="map-toolbar">
+        <div class="building-status mono" id="building-status">Zoom in to street level to see building shadows</div>
+        <label class="height-input">
+          Assumed height
+          <input type="number" id="assumed-height" min="2" max="200" step="1" value="6">m
+        </label>
+      </div>
       <div id="map"></div>
     </div>
 
@@ -68,7 +75,7 @@
     <div class="slider-ticks mono"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span></div>
   </div>
 
-  <p class="foot-note">Times on the slider are <b>UTC</b>, not local clock time — solar noon (when the sun is highest) drifts across the day depending on longitude and the equation of time. Day/night shading and sun position use standard low‑precision solar formulas; shadow length assumes flat, obstruction‑free ground.</p>
+  <p class="foot-note">Times on the slider are <b>UTC</b>, not local clock time — solar noon (when the sun is highest) drifts across the day depending on longitude and the equation of time. Building shadows come from OpenStreetMap footprints (via Overpass), simplified to their outer hull, using each building's tagged height where available or the assumed height above otherwise — real shadows may differ due to roof shape, trees, or nearby terrain. Day/night shading and sun position use standard low‑precision solar formulas.</p>
 </div>
 
 <script type="module" src="./app.js"></script>
