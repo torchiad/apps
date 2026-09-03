@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gnomon — sun position, shadows &amp; day/night, anywhere on Earth</title>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<div class="wrap">
+  <a class="back-link" href="../">&larr; All apps</a>
+  <header>
+    <div class="kicker">Gnomon</div>
+    <h1>Where the <em>shadows</em> fall</h1>
+    <p class="standfirst">Drop a pin anywhere on Earth, scrub through the day, and see the sun's position, the day/night line, and how long a shadow would fall — at any time, any date.</p>
+  </header>
+
+  <div class="search-row">
+    <div class="search-box">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input id="search" type="search" placeholder="Search a place…" autocomplete="off">
+      <div id="search-results" class="search-results" hidden></div>
+    </div>
+    <button id="btn-geo" class="pill-btn" title="Use my location">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M22 12h-3M5 12H2"/></svg>
+      My location
+    </button>
+    <div class="coords mono" id="coords">51.5074°N, 0.1278°W</div>
+  </div>
+
+  <div class="layout">
+    <div class="panel map-panel">
+      <div id="map"></div>
+    </div>
+
+    <div class="panel side-panel">
+      <div class="scene-wrap">
+        <svg id="scene" viewBox="0 0 300 170" preserveAspectRatio="xMidYMid slice"></svg>
+        <div class="scene-caption" id="scene-caption">—</div>
+      </div>
+
+      <dl class="readout">
+        <div><dt>Sun altitude</dt><dd id="ro-alt">—</dd></div>
+        <div><dt>Sun azimuth</dt><dd id="ro-az">—</dd></div>
+        <div><dt>Shadow direction</dt><dd id="ro-shadow-dir">—</dd></div>
+        <div><dt>Shadow length<span class="hint">10m pole</span></dt><dd id="ro-shadow-len">—</dd></div>
+        <div><dt>Sunrise</dt><dd id="ro-sunrise">—</dd></div>
+        <div><dt>Solar noon</dt><dd id="ro-noon">—</dd></div>
+        <div><dt>Sunset</dt><dd id="ro-sunset">—</dd></div>
+        <div><dt>Day length</dt><dd id="ro-daylen">—</dd></div>
+      </dl>
+    </div>
+  </div>
+
+  <div class="panel timeline-panel">
+    <div class="timeline-row">
+      <input type="date" id="date" class="date-input mono">
+      <button id="btn-play" class="pill-btn" title="Play through the day">
+        <svg id="icon-play" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
+        <svg id="icon-pause" viewBox="0 0 24 24" fill="currentColor" class="is-hidden"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>
+        <span id="play-label">Play</span>
+      </button>
+      <div class="time-out mono" id="time-out">12:00 UTC</div>
+      <button id="btn-now" class="pill-btn ghost">Now</button>
+    </div>
+    <input type="range" id="time" min="0" max="1439" step="5" value="720" class="time-slider">
+    <div class="slider-ticks mono"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>23:59</span></div>
+  </div>
+
+  <p class="foot-note">Times on the slider are <b>UTC</b>, not local clock time — solar noon (when the sun is highest) drifts across the day depending on longitude and the equation of time. Day/night shading and sun position use standard low‑precision solar formulas; shadow length assumes flat, obstruction‑free ground.</p>
+</div>
+
+<script type="module" src="./app.js"></script>
+</body>
+</html>

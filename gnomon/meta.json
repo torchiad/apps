@@ -1,0 +1,8 @@
+{
+    "name": "Gnomon",
+    "category": "Tool",
+    "blurb": "Drop a pin anywhere on Earth and scrub through the day to see sun position, day/night, and shadow length.",
+    "hue": 30,
+    "pattern": "waves",
+    "date": "2026-09-03"
+}

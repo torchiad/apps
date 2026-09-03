@@ -141,6 +141,17 @@ const PROJECTS = [
         "category": "Tool",
         "blurb": "Paste any RSS link and read it as clean, formatted articles. Loads Swindon Advertiser news by default.",
         "date": "2026-08-12"
+    },
+    {
+        "slug": "gnomon",
+        "path": "/apps/gnomon/",
+        "uses": 0,
+        "hue": 30,
+        "pattern": "waves",
+        "name": "Gnomon",
+        "category": "Tool",
+        "blurb": "Drop a pin anywhere on Earth and scrub through the day to see sun position, day/night, and shadow length.",
+        "date": "2026-09-03"
     }
 ];
 
