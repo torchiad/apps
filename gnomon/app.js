@@ -188,9 +188,45 @@ map.on('click', e => {
 });
 
 // ---------- real building shadows (OpenStreetMap footprints via Overpass) ----------
+// The public Overpass API is a free, best-effort service that's frequently slow,
+// rate-limited, or briefly down — so we try a few known mirrors before giving up.
+const OVERPASS_ENDPOINTS = [
+  'https://overpass-api.de/api/interpreter',
+  'https://overpass.kumi.systems/api/interpreter',
+  'https://overpass.osm.ch/api/interpreter',
+];
+
+async function fetchOverpass(query, outerSignal) {
+  let lastErr = new Error('no Overpass endpoints available');
+  for (const url of OVERPASS_ENDPOINTS) {
+    if (outerSignal.aborted) throw new DOMException('aborted', 'AbortError');
+    const timeoutController = new AbortController();
+    const onOuterAbort = () => timeoutController.abort();
+    outerSignal.addEventListener('abort', onOuterAbort);
+    const timeoutId = setTimeout(() => timeoutController.abort(), 10000);
+    try {
+      const res = await fetch(url, {
+        method: 'POST',
+        body: 'data=' + encodeURIComponent(query),
+        signal: timeoutController.signal,
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return await res.json();
+    } catch (e) {
+      if (outerSignal.aborted) throw new DOMException('aborted', 'AbortError');
+      lastErr = e;
+    } finally {
+      clearTimeout(timeoutId);
+      outerSignal.removeEventListener('abort', onOuterAbort);
+    }
+  }
+  throw lastErr;
+}
+
 const buildingStatus = $('building-status');
 const assumedHeightInput = $('assumed-height');
 let buildingsData = [];
+let buildingsLoadedForView = false;
 let lastBuildingsKey = null;
 let buildingsAbort = null;
 
@@ -201,8 +237,19 @@ function drawBuildingFootprints() {
   }
 }
 
+function updateBuildingStatusText() {
+  if (!buildingsLoadedForView) return;
+  if (!buildingsData.length) {
+    buildingStatus.textContent = 'No mapped buildings found in this view';
+    return;
+  }
+  const nightHint = state.sunAltRad <= 0 ? ' — sun is below the horizon here right now, so no shadows' : '';
+  buildingStatus.textContent = `${buildingsData.length} building${buildingsData.length === 1 ? '' : 's'} loaded${nightHint}`;
+}
+
 function renderBuildingShadows() {
   shadowsLayer.clearLayers();
+  updateBuildingStatusText();
   if (state.sunAltRad <= 0) return;
   for (const b of buildingsData) {
     const h = buildingHeight(b.tags);
@@ -216,6 +263,7 @@ async function loadBuildingsForView() {
   const zoom = map.getZoom();
   if (zoom < 16) {
     buildingsData = [];
+    buildingsLoadedForView = false;
     lastBuildingsKey = null;
     buildingsLayer.clearLayers();
     shadowsLayer.clearLayers();
@@ -236,23 +284,18 @@ async function loadBuildingsForView() {
   buildingsAbort = new AbortController();
   buildingStatus.textContent = 'Loading buildings…';
   try {
-    const query = `[out:json][timeout:15];way["building"](${south},${west},${north},${east});out geom;`;
-    const res = await fetch('https://overpass-api.de/api/interpreter', {
-      method: 'POST',
-      body: 'data=' + encodeURIComponent(query),
-      signal: buildingsAbort.signal,
-    });
-    if (!res.ok) throw new Error('bad response');
-    const json = await res.json();
+    const query = `[out:json][timeout:20];way["building"](${south},${west},${north},${east});out geom;`;
+    const json = await fetchOverpass(query, buildingsAbort.signal);
     buildingsData = (json.elements || [])
       .filter(el => el.type === 'way' && el.geometry && el.geometry.length >= 3)
       .map(el => ({ id: el.id, footprint: el.geometry.map(pt => [pt.lat, pt.lon]), tags: el.tags || {} }));
-    buildingStatus.textContent = `${buildingsData.length} building${buildingsData.length === 1 ? '' : 's'} loaded`;
+    buildingsLoadedForView = true;
     drawBuildingFootprints();
     renderBuildingShadows();
   } catch (e) {
     if (e.name === 'AbortError') return;
-    buildingStatus.textContent = 'Could not load buildings — try panning again';
+    buildingsLoadedForView = false;
+    buildingStatus.textContent = 'Could not reach building data — try panning to retry';
   }
 }
 
@@ -267,7 +310,14 @@ function todayISO() {
   return d.toISOString().slice(0, 10);
 }
 dateInput.value = todayISO();
-timeSlider.value = new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
+// default to solar noon at the pin (not "now") so a fresh visit reliably shows a shadow —
+// "now" is often nighttime wherever the default pin happens to be.
+{
+  const noon = SunCalc.getTimes(new Date(), state.lat, state.lon).solarNoon;
+  timeSlider.value = (noon && !isNaN(noon.getTime()))
+    ? noon.getUTCHours() * 60 + noon.getUTCMinutes()
+    : new Date().getUTCHours() * 60 + new Date().getUTCMinutes();
+}
 
 function getCurrentDateTime() {
   const [y, m, d] = dateInput.value.split('-').map(Number);
@@ -280,6 +330,15 @@ $('btn-now').addEventListener('click', () => {
   dateInput.value = now.toISOString().slice(0, 10);
   timeSlider.value = now.getUTCHours() * 60 + now.getUTCMinutes();
   update();
+});
+
+$('btn-midday').addEventListener('click', () => {
+  const dt = getCurrentDateTime();
+  const noon = SunCalc.getTimes(dt, state.lat, state.lon).solarNoon;
+  if (noon && !isNaN(noon.getTime())) {
+    timeSlider.value = noon.getUTCHours() * 60 + noon.getUTCMinutes();
+    update();
+  }
 });
 
 dateInput.addEventListener('change', update);
