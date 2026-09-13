@@ -29,5 +29,6 @@ Push to GitHub, enable Pages (Settings → Pages → Source: GitHub Actions). Th
 ## Checks
 
 Every PR runs lint (`npm run lint`), a build, a Playwright smoke test
-(`npm run test:e2e`), and an automated Claude code/security review — see
-`AGENTS.md` for details and for how work is tracked and merged.
+(`npm run test:e2e`), an automated Claude code/security review, and a
+secret scan — see `AGENTS.md` for details and for how work is tracked and
+merged, and `SECURITY.md` to report a vulnerability.

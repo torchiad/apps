@@ -121,14 +121,18 @@ Every PR must pass, in this order:
    — an automated pass for correctness bugs and OWASP-Top-10-style
    security issues. It fails the check on any finding it labels BLOCKING;
    optional/style findings never fail the check.
+5. **Secret scan** (`.github/workflows/gitleaks.yml`) — fails if the diff
+   introduces anything that looks like a committed credential.
 
-All four are enforced as required GitHub status checks in this repo's branch
-protection. There is no "merge anyway" for a red check.
+All of the above are enforced as required GitHub status checks in this
+repo's branch protection. There is no "merge anyway" for a red check.
+Dependabot (`.github/dependabot.yml`) additionally opens PRs for vulnerable
+or outdated dependencies, which go through the same gates as any other PR.
 
 ## Overseer / auto-merge policy
 
 Tasks dispatched from the board are driven by an overseer process, not a
-human clicking merge for each one: once all four quality gates above are
+human clicking merge for each one: once all quality gates above are
 green on a PR, it is merged automatically and its branch/worktree is deleted.
 This makes the gates above the *entire* safety net for what lands in `main`
 — when adding or changing a gate, assume nothing else will catch what it

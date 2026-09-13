@@ -1,0 +1,38 @@
+name: Agent task
+description: A task well-specified enough for an AI coding agent to pick up unattended.
+labels: ["ready-for-agent"]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What needs to change
+      description: Be concrete about the app/file(s) involved and the desired end state.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Acceptance criteria
+      description: A checklist an agent (or you) can verify mechanically. Vague criteria will bounce back as needs-human.
+      placeholder: |
+        - [ ] ...
+        - [ ] ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: test-plan
+    attributes:
+      label: How to verify it
+      description: What should be run/clicked/checked to confirm this works (beyond the standard lint/build/test:e2e gates in AGENTS.md).
+    validations:
+      required: false
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context / non-goals
+      description: Anything that would otherwise require a guess — related files, things explicitly out of scope, prior art.
+    validations:
+      required: false
