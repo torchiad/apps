@@ -4,36 +4,16 @@ A shelf of standalone HTML/JS apps. No build step. Deploy anywhere static.
 
 ## Adding an app
 
-1. Create a folder under `apps/`:
-   ```
-   apps/your-app-name/
-   ├── index.html
-   ├── app.js
-   ├── style.css
-   └── meta.json
-   ```
+See `AGENTS.md` for the full, accurate steps (it covers three files that all
+need updating together: the new app folder, `vite.config.js`, and the
+`PROJECTS` list in `index.js`). Short version:
 
-2. Fill in `meta.json`:
-   ```json
-   {
-     "name": "Your App",
-     "category": "Tool",
-     "blurb": "One sentence describing what it does.",
-     "hue": 220,
-     "pattern": "dots",
-     "date": "2026-06-02"
-   }
-   ```
-
-   **pattern** options: `dots` · `stripes` · `arch` · `grid` · `waves` · `blocks`  
-   **hue** is an oklch hue value (0–360) — picks the tile colour.
-
-3. Run locally to update the listing:
-   ```
-   node generate.js
-   ```
-
-4. Push to `main` — GitHub Actions regenerates and deploys automatically.
+1. Create a folder under `apps/` with `index.html`, `app.js`, `style.css`
+   (and optionally a `meta.json` for reference — see `AGENTS.md`).
+2. Add an entry point for it in `vite.config.js`.
+3. Add a matching entry to the `PROJECTS` array in `index.js` — this is what
+   actually drives the hub listing.
+4. Push to `main` — GitHub Actions builds and deploys automatically.
 
 ## Running locally
 
