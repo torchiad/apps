@@ -401,7 +401,7 @@ searchInput.addEventListener('input', () => {
           update();
         });
       });
-    } catch (e) { searchResults.hidden = true; }
+    } catch { searchResults.hidden = true; }
   }, 400);
 });
 document.addEventListener('click', e => {

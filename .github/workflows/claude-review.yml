@@ -1,0 +1,50 @@
+name: Claude Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Claude code + security review
+        uses: anthropics/claude-code-action@v1
+        with:
+          claude_args: |
+            {
+              "model": "claude-sonnet-5"
+            }
+          prompt: |
+            Review this pull request's diff against the target branch.
+
+            Do two passes:
+            1. Code review: correctness bugs, and reuse/simplification/
+               efficiency cleanups. This repo (see AGENTS.md) is a shelf of
+               small, framework-free static apps built with Vite — hold the
+               diff to that bar, not a large-app standard.
+            2. Security review: injected/unsanitized HTML, unsafe use of
+               external input, secrets or credentials, unsafe dependency
+               changes, anything from the OWASP Top 10.
+
+            Post your findings as a single PR review comment (use `gh pr
+            comment`), ranked most-severe first. Label each finding's
+            severity as BLOCKING (a real bug or a security issue) or
+            OPTIONAL (nit/style/simplification).
+
+            This check gates merge: if you found ANY blocking finding, run
+            `exit 1` as your final action so this workflow fails. If every
+            finding is optional (or you found nothing), let the workflow
+            succeed. Never fail the check over optional/style findings
+            alone.
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}

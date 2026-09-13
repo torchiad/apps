@@ -4,3 +4,6 @@ dist/
 .env.local
 .env.*.local
 .cache/
+test-results/
+playwright-report/
+blob-report/

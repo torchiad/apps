@@ -25,3 +25,9 @@ npx serve .
 ## Deploying
 
 Push to GitHub, enable Pages (Settings → Pages → Source: GitHub Actions). The workflow in `.github/workflows/deploy.yml` handles everything.
+
+## Checks
+
+Every PR runs lint (`npm run lint`), a build, a Playwright smoke test
+(`npm run test:e2e`), and an automated Claude code/security review — see
+`AGENTS.md` for details and for how work is tracked and merged.

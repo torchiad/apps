@@ -17,13 +17,16 @@ optionally importing a package from `dependencies` (e.g. `leaflet`,
 ```
 npm install
 npm run dev        # Vite dev server
-npm run build       # outputs to dist/
-npm run preview     # preview the production build
+npm run build      # outputs to dist/
+npm run preview    # preview the production build
+npm run lint       # ESLint over the whole repo
+npm run test:e2e   # Playwright: builds, serves, loads every app, checks for JS errors
 ```
 
-No test suite or linter is configured. Validate changes by running
-`npm run build` and confirming it completes without error, and by checking
-any touched `.json` files parse (`node -e "JSON.parse(require('fs').readFileSync('path/to/meta.json'))"`).
+Validate changes with `npm run lint`, `npm run build`, and `npm run test:e2e`
+before opening a PR — these three are also what CI runs (see below), so a
+green local run should mean a green PR. If you touched any `.json` file,
+also confirm it parses: `node -e "JSON.parse(require('fs').readFileSync('path/to/file.json'))"`.
 
 ## Adding a new app — the real steps
 
@@ -73,15 +76,73 @@ mistake.)
 
 ## Before committing
 
-- Run `npm run build` and confirm it succeeds.
+- Run `npm run lint`, `npm run build`, and `npm run test:e2e` and confirm all
+  three succeed.
 - If you touched any `meta.json`, confirm it's valid JSON and lives inside an
   app folder, not the repo root.
 - If you added an app, confirm all three of `vite.config.js`, `index.js`
   (`PROJECTS`), and the new folder are in the same commit — one without the
-  others leaves the repo in a broken state.
+  others leaves the repo in a broken state. Also add it to the `APPS` list in
+  `tests/smoke.spec.js` so the visual verifier covers it.
 
 ## PRs
 
 Keep PRs scoped to one app or one concern. Describe what changed and, for a
 new app, note the entry was added to `vite.config.js` and `index.js` as
 described above.
+
+## The task board
+
+Work for agents is tracked as GitHub issues on this repo, labeled:
+
+- `ready-for-agent` — well-specified enough (acceptance criteria + rough test
+  plan in the issue body) for an agent to pick up unattended.
+- `in-progress` — an agent has claimed it and is working in a branch/worktree
+  named after the issue (e.g. `agent/issue-123`).
+- `needs-human` — an agent got stuck, hit an ambiguous design decision, or
+  exhausted its retry budget; a person needs to look at it.
+
+An issue without `ready-for-agent` is not a green light to start unattended
+work on it — treat it as still being scoped, and ask rather than guess at
+missing acceptance criteria.
+
+## Quality gates (what actually blocks a merge)
+
+Every PR must pass, in this order:
+
+1. **Lint** — `npm run lint` (ESLint, `eslint.config.js`).
+2. **Build** — `npm run build`.
+3. **Visual verification** — `npm run test:e2e` (Playwright: loads every
+   app's real built page in a browser and fails on any uncaught JS
+   exception or `console.error`; network failures from third-party
+   resources like fonts/map tiles/RSS feeds are treated as noise, not
+   signal, since the CI runner has no general internet access).
+4. **Claude code + security review** (`.github/workflows/claude-review.yml`)
+   — an automated pass for correctness bugs and OWASP-Top-10-style
+   security issues. It fails the check on any finding it labels BLOCKING;
+   optional/style findings never fail the check.
+
+All four are enforced as required GitHub status checks in this repo's branch
+protection. There is no "merge anyway" for a red check.
+
+## Overseer / auto-merge policy
+
+Tasks dispatched from the board are driven by an overseer process, not a
+human clicking merge for each one: once all four quality gates above are
+green on a PR, it is merged automatically and its branch/worktree is deleted.
+This makes the gates above the *entire* safety net for what lands in `main`
+— when adding or changing a gate, assume nothing else will catch what it
+misses.
+
+Consequences of that for anyone (human or agent) working in this repo:
+
+- Never weaken a gate (skip a test, silence a lint rule, narrow what the
+  Playwright smoke test checks) to get a PR green. Fix the underlying
+  issue, or if the gate itself is wrong, say so explicitly in the PR
+  description rather than quietly routing around it.
+- A worker that can't get its own PR green after a couple of honest retries
+  should label the issue `needs-human` and stop, rather than keep pushing
+  speculative fixes against an auto-merge gate.
+- One task = one worktree/branch, never shared between concurrent tasks.
+  Delete it after merge (success) or hand-off to a human (`needs-human`) —
+  don't leave stale branches around.
